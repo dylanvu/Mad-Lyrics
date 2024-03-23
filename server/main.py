@@ -22,3 +22,7 @@ async def read_item(item_id):
 async def create_name(name:Name):
     # f embeds code into a string
     return {f"Hello, {name.firstName} {name.lastName}"}
+
+# chatgpt 
+@app.get("/lyricstemplate")
+async def get_lyrics()
