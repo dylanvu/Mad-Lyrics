@@ -1,12 +1,12 @@
 from fastapi import FastAPI, WebSocket
 from pydantic import BaseModel
-from openai import OpenAI
+import openai
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
 
-OpenAI.my_api_key = os.getenv("OPEN_AI_API_KEY")
+openai.api_key = os.getenv("OPEN_AI_API_KEY")
 
 class Name(BaseModel):
     firstName: str = "Jas"
@@ -124,7 +124,7 @@ Generate new JSON lyrics following the same schema. Continue to replace words/ph
 """}
     ]
 
-    chat = OpenAI.ChatCompletion.create( 
+    chat = openai.chat.completions.create( 
             model="gpt-4-turbo-preview", messages=prompt 
         )
     
