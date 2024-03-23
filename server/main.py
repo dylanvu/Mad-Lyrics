@@ -54,7 +54,7 @@ async def create_name(name:Name):
 
 # websocket
 @app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket, client_id: Union[str, None] = None):
+async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None):
     if client_id is None:
         client_id = websocket.query_params.get("client_id")
 
@@ -68,11 +68,12 @@ async def websocket_endpoint(websocket: WebSocket, client_id: Union[str, None] =
     try:
         while True:
             binary_data = await websocket.receive_bytes()
-             await manager.broadcast(binary_data) 
+            await manager.broadcast(binary_data) 
 
     except WebSocketDisconnect:
         print("Disconnecting...")
         manager.disconnect(client_id)
+
 # chatgpt 
 @app.get("/lyricstemplate")
 async def get_lyrics():
