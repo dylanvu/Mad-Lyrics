@@ -6,8 +6,11 @@ import {
     MutableRefObject,
     useEffect,
     createRef,
+    useContext,
 } from "react";
 import { Input } from "@/components/ui/input";
+
+import { WebsocketContext } from "@/components/socket";
 
 interface LyricPart {
     part: string;
@@ -57,6 +60,8 @@ const example = `
 
 export default function Home() {
     const [inputs, setInputs] = useState<string[]>([]);
+
+    const ws = useContext(WebsocketContext);
 
     // convert from string to json
     const json = JSON.parse(example) as LyricPart[];
@@ -119,6 +124,13 @@ export default function Home() {
                     );
                 })}
             </div>
+            <button
+                onClick={() => {
+                    ws.send("test");
+                }}
+            >
+                Submit
+            </button>
         </main>
     );
 }
