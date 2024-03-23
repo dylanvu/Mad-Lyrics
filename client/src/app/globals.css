@@ -74,3 +74,17 @@
         @apply bg-background text-foreground;
     }
 }
+
+@layer utilities {
+    .wrapper {
+        @apply mx-auto w-full max-w-screen-2xl px-2 md:px-20;
+    }
+
+    .flex-center {
+        @apply flex items-center justify-center;
+    }
+
+    .flex-between {
+        @apply flex items-center justify-between;
+    }
+}
