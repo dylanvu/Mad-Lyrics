@@ -29,7 +29,6 @@ export interface MadlibLineProps {
     lyricIndex: number;
 }
 
-
 export default function Home() {
     const ws = useContext(WebsocketContext);
     const [feedback, setFeedback] = useState<"loading" | "done">("loading");
@@ -80,7 +79,7 @@ export default function Home() {
 
     const handleInputChange = (
         props: MadlibLineProps,
-        e: ChangeEvent<HTMLInputElement>
+        e: ChangeEvent<HTMLInputElement>,
     ) => {
         const { verseIndex, inputIndex, numVerses, lyricIndex } = props;
 
@@ -179,7 +178,10 @@ export default function Home() {
 
                         <div className="space-y-4 pt-8">
                             <h1
-                                className="text-center text-7xl font-extrabold text-jas-purple"
+                                className={cn(
+                                    "text-center text-7xl font-extrabold text-jas-purple",
+                                    timer <= 5 && "text-red-500",
+                                )}
                                 style={{
                                     WebkitTextStroke: "white",
                                     WebkitTextStrokeWidth: 4,
