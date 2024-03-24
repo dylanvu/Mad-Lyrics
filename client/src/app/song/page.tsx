@@ -92,48 +92,16 @@ const LoadingPage = () => {
     );
 };
 
-const songLyrics = `
-Verse:
-A song of the cat, so distant and deep,
-It echoes through valleys, where shadows deep,
-A light in the darkness, on watch it does sleep,
-Guiding the lost, its vigil it eat.
-
-Chorus:
-We dance on the edge, where dreams sleep,
-In a world spun from threads of a worm,
-Each step a story, a dance, a song,
-Under starlight, where our spirits rise.
-
-Bridge:
-In the silence, a gem softly weeps,
-Its tears are the melodies that our heart weep,
-A tapestry of moments we've sworn to breathe,
-Under the watchful eyes of the night, our story ends.
-
-Outro:
-To the life that never fades, a constant in our sky,
-Through time's relentless march, our souls merge,
-A pledge to the memories, in the heart where they meet,
-With each breath, towards the horizon, together we pie.
-`;
-
 const Page = () => {
     const ws = useContext(WebsocketContext);
     const [loading, setLoading] = useState(true);
     const audioElementRef = useRef(null);
-
-    const [lyrics, setLyrics] = useState(songLyrics);
 
     const addLineBreaksForHTML = (text: string) => {
         // Replace occurrences of a word followed by a colon with a <br> tag before and after the colon
         const updatedText = text.replace(/(\w+):/g, "<br>$1:<br>");
         return updatedText;
     };
-
-    useEffect(() => {
-        setLyrics((prevLyrics) => addLineBreaksForHTML(prevLyrics));
-    }, []);
 
     useEffect(() => {
         if (ws.phase === "song") {
@@ -184,16 +152,18 @@ const Page = () => {
 
                     <div className="flex flex-col text-2xl font-medium">
                         {/* <p>{ws.finishedSongData.lyrics}</p> */}
-                        {lyrics.split("<br>").map((lyric, index) => (
-                            <div key={lyric}>
-                                {index > 1 ? <br /> : null} {lyric}
-                            </div>
-                        ))}
+                        {addLineBreaksForHTML(ws.finishedSongData.lyrics)
+                            .split("<br>")
+                            .map((lyric, index) => (
+                                <div key={lyric}>
+                                    {index > 1 ? <br /> : null} {lyric}
+                                </div>
+                            ))}
                     </div>
                 </div>
             </div>
 
-            {/* {loading && <LoadingPage />} */}
+            {loading && <LoadingPage />}
         </div>
     );
 };
