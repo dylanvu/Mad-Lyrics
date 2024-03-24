@@ -33,10 +33,8 @@ app.add_middleware(
 )
 
 SUNO_COOKIE = os.getenv("SUNO_COOKIE")
-try:
-    GenerateSong = SongsGen(SUNO_COOKIE)
-except Exception as e:
-    print(e)
+GenerateSong = SongsGen(SUNO_COOKIE)
+
 
 
 openai.api_key = os.getenv("OPEN_AI_API_KEY")
@@ -232,27 +230,49 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                     print(replaced_lyrics)
 
                     # TODO: need to call Suno
-
-                    # TODO: need to send data back
-                    
-
-                    # TODO: Remove sample song
-                    print("Getting sample song")
-                    path_to_song = './output/2 .mp3'
-                    with open(path_to_song, 'rb') as mp3_file:
-                        while True:
-                            # reading data in chunks of 4kb
-                            chunk = mp3_file.read(48000)
-                            print("chunk", flush=True)
-                            if not chunk:
-                                break
+                    # TODO: fix this
+                    genre = "Funny Pop Song"
+                    # genre = data["genre"]
+                    # create var that calls the function to generate a song using the Suno function "songGen" with the suno api key
+                    # get_songs_custom is a function under suno with the lyrics and genre passed through the combined user prompted genre and gpt generated lyrics
+                    output = GenerateSong.get_songs_custom(replaced_lyrics, genre)
+                    # returns a link from the "song url" element inside of the output item in dictionary, stored in link. The first element in the array
+                    link = output['song_urls'][0]
+                    # gets the mp3 associated with each link and sets streaming in websocket to true, meaning that data is sent in chunks
+                    audio = GenerateSong.get_mp3(link, stream=True)
+                    for chunk in audio:
+                        if chunk:
+                            # translates binary to base64 string
                             b64 = base64.b64encode(chunk)
+                            # decodes the b.64 binary obj into a string
                             utf = b64.decode('utf-8')
+                            # creates a dict obj that stores the event as an audio chunk and sets the audio data to utf format
                             obj = {
                                 "event": "audio",
                                 "audio_data": utf
                             }
+                            # waits for broadcasting to run
                             await manager.broadcast(obj)
+                    
+                    
+
+                    # # TODO: Remove sample song
+                    # print("Getting sample song")
+                    # path_to_song = './output/2 .mp3'
+                    # with open(path_to_song, 'rb') as mp3_file:
+                    #     while True:
+                    #         # reading data in chunks of 4kb
+                    #         chunk = mp3_file.read(48000)
+                    #         print("chunk", flush=True)
+                    #         if not chunk:
+                    #             break
+                    #         b64 = base64.b64encode(chunk)
+                    #         utf = b64.decode('utf-8')
+                    #         obj = {
+                    #             "event": "audio",
+                    #             "audio_data": utf
+                    #         }
+                    #         await manager.broadcast(obj)
 
     except WebSocketDisconnect:
         print("Disconnecting...")
