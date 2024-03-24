@@ -33,6 +33,7 @@ interface ISocketContext {
     audioQueueRef: any;
     data: boolean;
     finishedSongData: { title: string; lyrics: string };
+    players: string[];
 }
 
 const startingPhase = "lobby";
@@ -51,6 +52,7 @@ export const WebsocketContext = createContext<ISocketContext>({
         title: "",
         lyrics: "",
     },
+    players: [],
 });
 
 export const WebsocketProvider = ({
@@ -69,6 +71,7 @@ export const WebsocketProvider = ({
         title: "",
         lyrics: "",
     });
+    const [players, setPlayers] = useState<string[]>([]);
 
     const ws = useRef<WebSocket | null>(null);
 
@@ -107,6 +110,8 @@ export const WebsocketProvider = ({
                 setPhase(eventObject.data);
             } else if (eventObject.event === "lyrics") {
                 setSongData(eventObject.lyrics);
+            } else if (eventObject.event === "connection") {
+                setPlayers(eventObject.players);
             }
         };
 
@@ -151,6 +156,7 @@ export const WebsocketProvider = ({
         audioQueueRef: audioQueueRef,
         data: data,
         finishedSongData: finishedSongData,
+        players: players,
     };
 
     return (
