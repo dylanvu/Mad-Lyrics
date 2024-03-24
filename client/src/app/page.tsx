@@ -214,10 +214,10 @@ export default function Home() {
 
                         <div className="space-y-4 pt-8">
                             <h1
-                                className="text-center text-8xl font-black text-jas-purple"
+                                className="text-center text-7xl font-extrabold text-jas-purple"
                                 style={{
                                     WebkitTextStroke: "white",
-                                    WebkitTextStrokeWidth: 5,
+                                    WebkitTextStrokeWidth: 4,
                                 }}
                             >
                                 {Math.max(0, timer)} seconds
@@ -227,7 +227,7 @@ export default function Home() {
                             </p>
                         </div>
 
-                        <div className="relative px-16 py-16">
+                        <div className="relative px-16 py-8">
                             <Progress
                                 value={stage * 33}
                                 className="h-8 transition duration-2000"

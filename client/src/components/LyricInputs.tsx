@@ -116,7 +116,7 @@ const LyricInputs = ({
                                 <span
                                     key={index}
                                     className={cn(
-                                        "text-4xl font-bold leading-loose text-white text-opacity-75",
+                                        "text-[42px] font-semibold leading-loose text-white text-opacity-75",
                                         component.type == InputComponent &&
                                             "focus-visible:outline-jas-purple focus-visible:ring-jas-purple",
                                     )}
