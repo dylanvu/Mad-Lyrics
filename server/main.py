@@ -53,9 +53,9 @@ class ConnectionManager:
         self.currentLyrics: str = ""
         self.num_inputs = 0
         self.order_players_by_arrival: List[str] = []
-        self.player_genres: Dict[str, str] = []
-        self.player_emotions: Dict[str, str] = []
-        self.player_topics: Dict[str, str] = []
+        self.player_genres: Dict[str, str] = {}
+        self.player_emotions: Dict[str, str] = {}
+        self.player_topics: Dict[str, str] = {}
 
 
     # establish connection btwn a client and ws. waits for ws to start and adds accepted client to active connections
