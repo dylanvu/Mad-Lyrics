@@ -34,6 +34,7 @@ app.add_middleware(
 
 SUNO_COOKIE = os.getenv("SUNO_COOKIE")
 GenerateSong = SongsGen(SUNO_COOKIE)
+print(GenerateSong.get_limit_left())
 
 
 

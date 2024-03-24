@@ -25,7 +25,6 @@ base_url = "https://studio-api.suno.ai"
 browser_version = "edge101"
 
 HEADERS = {
-    "Origin": base_url,
     "Referer": base_url + "/",
     "DNT": "1",
     "Accept-Encoding": "gzip, deflate, br",
@@ -51,6 +50,7 @@ class SongsGen:
     def _get_auth_token(self):
         response = self.session.get(get_session_url, impersonate=browser_version)
         data = response.json()
+        print(data)
         sid = data.get("response").get("last_active_session_id")
         if not sid:
             raise Exception("Failed to get session id")
@@ -95,12 +95,13 @@ class SongsGen:
         response = self.session.get(url, impersonate=browser_version)
 
         try:
+            print(response.json())
             data = response.json()[0]
         except:
             if response.json().get("detail", "") == "Unauthorized":
                 print("Token expired, renewing...")
                 self._renew()
-                return None, None
+                return None
         data = response.json()
         # print(data)
         rs = {
@@ -144,6 +145,11 @@ class SongsGen:
                 raise Exception("Request timeout")
             # TODOs support all mp3 here
             song_info = self._fetch_songs_metadata(request_ids)
+            
+            # If none, renew token and retry
+            if not song_info:
+                continue
+            
             # spider rule
             time.sleep(1)
             try_index += 1
@@ -186,6 +192,11 @@ class SongsGen:
                 raise Exception("Request timeout")
             # TODOs support all mp3 here
             song_info = self._fetch_songs_metadata(request_ids)
+            
+            # If none, renew token and retry
+            if not song_info:
+                continue
+            
             # spider rule
             time.sleep(1)
             try_index += 1
