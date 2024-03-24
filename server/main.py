@@ -1,7 +1,11 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
+from typing import Dict, List
 import openai
 import base64
+import json
+import re
+import random
 
 from suno import SongsGen
 from dotenv import load_dotenv
@@ -47,6 +51,8 @@ class ConnectionManager:
         self.active_connections: Dict[str, WebSocket] = {}
         self.ready_players: Dict[str, bool] = {}
         self.player_inputs: Dict[str, List[List[str]]] = {}
+        self.currentLyrics: str = ""
+        self.num_inputs = 0
 
     # establish connection btwn a client and ws. waits for ws to start and adds accepted client to active connections
     async def connect(self, websocket: WebSocket, client_id: str):
@@ -188,11 +194,14 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                     #     await manager.broadcast(obj)
             
             elif event == "start":
+                # call the api
                 # This should bring players from the lobby to the input screen
                 obj = {
                     "event": "phase_change",
                     "data": "input"
                 }
+                lyrics = await get_lyrics()
+                await manager.broadcast(lyrics)
                 await manager.broadcast(obj)
             elif event == "finished":
                 # parse out the event data to get which player finished
@@ -207,11 +216,60 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                     # bring all players to the moving screen
                     print("READY TO GENERATE")
                     print(manager.player_inputs)
-                    # TODO: need to randomly select from inputs
+                    # randomly select from inputs
+                    # flatten each player's input for ease of parsing
+                    all_flattened_inputs = []
+                    for player in manager.player_inputs:
+                        flattened_inputs = [item for sublist in manager.player_inputs[player] for item in sublist]
+                        all_flattened_inputs.append(flattened_inputs)
+                    # choose random choices
+                    # iterate through each input
+                    print(manager.num_inputs)
+                    print(all_flattened_inputs)
+                    combined_list = []
+                    for inputIndex in range(0, manager.num_inputs):
+                        num_players = len(manager.player_inputs.keys())
+                        # check if there is any choice that has no inputs
+                        # Initialize a list to store the results for each index
+                        curr_list = []
+                        # Loop through each index from 0 to 16
+                        for i in range(0, num_players):
+                            # Check if any player has a non-empty string at the current index
+                            if len(all_flattened_inputs[i][inputIndex]) > 0:
+                                curr_list.append(all_flattened_inputs[i][inputIndex])
+                        if(len(curr_list) > 0):
+                            # choose a random one
+                            randomInt = generate_random_number(len(curr_list))
+                            selectedPlayerInputs = curr_list[randomInt]
+                            combined_list.append(selectedPlayerInputs)
+                        else:
+                            # TODO: replace this
+                            combined_list.append('dog')
+                
+                    # replace prompt with end_inputs
+                    print(combined_list)
+                    pattern = r'\{.*?\}'
+                    # turn the json structure into just a plain string
+                    output = ""
+                    # print(manager.currentLyrics)
+                    for section in json.loads(manager.currentLyrics):
+                        output += f"{section['part']}:\n"
+                        output += "\n".join(section["lyrics"]) + "\n\n"
+                    print(output)
+                    replaced_lyrics = output
+                    current_input_index = 0
+                    # While there are matches and the current_input_index is less than the length of combined_list
+                    while re.search(pattern, replaced_lyrics) and current_input_index < len(combined_list):
+                        # Replace the first instance
+                        replaced_lyrics = re.sub(pattern, combined_list[current_input_index], replaced_lyrics, count=1)
+                        current_input_index += 1
+
+                    print(replaced_lyrics)
 
                     # TODO: need to call Suno
 
                     # TODO: need to send data back
+                    
 
                     # TODO: Remove sample song
                     print("Getting sample song")
@@ -257,7 +315,7 @@ Have only 1 mad lib per line. There must be 1 mad-lib per line.
 """}
     ]
     chat = openai.chat.completions.create( 
-            model="gpt-4-turbo-preview", messages=prompt 
+            model="gpt-4-turbo-preview", messages=prompt
         )
     
     reply = chat.choices[0].message.content 
@@ -305,5 +363,22 @@ Have only 1 mad lib per line. There must be 1 mad-lib per line.
     reply = reply.replace("```", "")
     reply = reply.strip()
     print(f"ChatGPT: {reply}") 
-    return {"lyrics": reply}
+    manager.currentLyrics = reply
+    # parse out information about the response, such as how many inputs there are
+    lyrics = json.loads(reply)
+    pattern = r'\{.*?\}'
+    num_inputs = 0
+    for part in lyrics:
+        for line in part["lyrics"]:
+            matches = re.findall(pattern, line)
+            if (matches):
+                num_inputs += len(matches)
+    manager.num_inputs = num_inputs
 
+    return {
+        "event": "lyrics",
+        "lyrics": reply
+        }
+
+def generate_random_number(upper_limit):
+    return random.randrange(0, upper_limit)

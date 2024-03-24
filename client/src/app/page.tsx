@@ -19,47 +19,6 @@ interface LyricPart {
     lyrics: string[];
 }
 
-const example = `
-[
-  {
-    "part": "Verse",
-    "lyrics": [
-      "The stars at night, they shine so {adjective},",
-      "Guiding me through the {noun} so {adjective}.",
-      "My {noun} by my side, steady and {adjective},",
-      "Through the silent streets, our spirits {verb}."
-    ]
-  },
-  {
-    "part": "Chorus",
-    "lyrics": [
-      "With every heartbeat, I feel {adjective},",
-      "In a world where {noun} often {verb}.",
-      "But in your {noun}, I find my {noun},",
-      "And in your eyes, the {noun} I've always {verb}."
-    ]
-  },
-  {
-    "part": "Bridge",
-    "lyrics": [
-      "In the quiet of the {noun}, we {verb},",
-      "To the music that makes our souls {verb},",
-      "Hand in hand, we {verb} and {verb},",
-      "In our {noun} world, where love never {verb}."
-    ]
-  },
-  {
-    "part": "Outro",
-    "lyrics": [
-      "So here's to our {noun}, our bond, and our {noun},",
-      "In this journey, we're never {adjective}.",
-      "From {noun} to {noun}, under the {noun}'s glow,",
-      "Together, into the future we {verb}."
-    ]
-  }
-]
-`;
-
 interface MadlibLineProps {
     verseIndex: number;
     inputIndex: number;
@@ -70,7 +29,7 @@ interface MadlibLineProps {
 interface MadlibInputProps extends MadlibLineProps {
     updateValue: (
         props: MadlibLineProps,
-        e: ChangeEvent<HTMLInputElement>,
+        e: ChangeEvent<HTMLInputElement>
     ) => void;
 }
 
@@ -84,7 +43,7 @@ const InputComponent = (props: MadlibInputProps) => {
             onChange={(e) => {
                 updateValue(
                     { verseIndex, inputIndex, numVerses, lyricIndex },
-                    e,
+                    e
                 );
             }}
         />
@@ -92,28 +51,33 @@ const InputComponent = (props: MadlibInputProps) => {
 };
 
 export default function Home() {
-    const [songData, setSongData] = useState<string>(example);
+    const ws = useContext(WebsocketContext);
     const [feedback, setFeedback] = useState<"loading" | "done">("loading");
 
-    // useEffect(() => {
-    //     fetch("http://localhost:8000/lyricstemplate", {
-    //         method: "GET",
-    //     })
-    //         .then(async (res) => {
-    //             const resBody = await res.json();
-    //             console.log(resBody.lyrics);
-    //             setSongData(resBody.lyrics);
-    //             setFeedback("done");
-    //         })
-    //         .catch((reason: any) => {
-    //             console.error(reason);
-    //             setFeedback("done");
-    //         });
-    // }, []);
+    useEffect(() => {
+        // fetch("http://localhost:8000/lyricstemplate", {
+        //     method: "GET",
+        // })
+        //     .then(async (res) => {
+        //         const resBody = await res.json();
+        //         console.log(resBody.lyrics);
+        //         setSongData(resBody.lyrics);
+        //         setFeedback("done");
+        //     })
+        //     .catch((reason: any) => {
+        //         console.error(reason);
+        //         setFeedback("done");
+        //     });
+    }, []);
 
-    const lyrics = JSON.parse(songData) as LyricPart[];
+    useEffect(() => {
+        if (ws.songData.length > 0) {
+            setFeedback("done");
+        }
+    }, [ws.songData]);
 
-    const ws = useContext(WebsocketContext);
+    const lyrics = JSON.parse(ws.songData) as LyricPart[];
+
     const router = useRouter();
 
     /* checks if line contains brackets (input fields) */
@@ -132,11 +96,11 @@ export default function Home() {
     const [stage, setStage] = useState(0);
     const [isFilled, setIsFilled] = useState(false);
 
-    const [timer, setTimer] = useState(15);
+    const [timer, setTimer] = useState(5);
 
     const handleInputChange = (
         props: MadlibLineProps,
-        e: ChangeEvent<HTMLInputElement>,
+        e: ChangeEvent<HTMLInputElement>
     ) => {
         const { verseIndex, inputIndex, numVerses, lyricIndex } = props;
 
@@ -274,13 +238,13 @@ export default function Home() {
                                                               }
                                                           />,
                                                       ]
-                                                    : [component],
+                                                    : [component]
                                         );
 
                                     // join the array
                                     lyricsComponents =
                                         lyricsComponents.concat(
-                                            inputAndStaticArray,
+                                            inputAndStaticArray
                                         );
                                 } else {
                                     // return just the text
@@ -309,7 +273,7 @@ export default function Home() {
                                                 <span key={index}>
                                                     {component}
                                                 </span>
-                                            ),
+                                            )
                                         )}
                                     </div>
 
@@ -317,7 +281,7 @@ export default function Home() {
                                         <p
                                             className={cn(
                                                 "text-3xl",
-                                                timer <= 5 && "text-[#FF0000]",
+                                                timer <= 5 && "text-[#FF0000]"
                                             )}
                                         >
                                             {Math.max(timer, 0)}

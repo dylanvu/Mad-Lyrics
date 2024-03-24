@@ -29,6 +29,7 @@ interface ISocketContext {
     setQueue: Dispatch<SetStateAction<string[]>>;
     phase: validPhases;
     id: string;
+    songData: string;
 }
 
 const startingPhase = "lobby";
@@ -40,6 +41,7 @@ export const WebsocketContext = createContext<ISocketContext>({
     setQueue: () => {},
     phase: startingPhase,
     id: "",
+    songData: "",
 });
 
 export const WebsocketProvider = ({
@@ -51,6 +53,7 @@ export const WebsocketProvider = ({
     const [valQueue, setValQueue] = useState<string[]>([]);
     const [client_id, setClientId] = useState("");
     const [currentPhase, setPhase] = useState<validPhases>(startingPhase);
+    const [songData, setSongData] = useState("");
 
     const ws = useRef<WebSocket | null>(null);
 
@@ -73,6 +76,8 @@ export const WebsocketProvider = ({
                 });
             } else if (eventObject.event === "phase_change") {
                 setPhase(eventObject.data);
+            } else if (eventObject.event === "lyrics") {
+                setSongData(eventObject.lyrics);
             }
         };
 
@@ -103,6 +108,7 @@ export const WebsocketProvider = ({
         setQueue: setValQueue,
         phase: currentPhase,
         id: client_id,
+        songData: songData,
     };
 
     return (
