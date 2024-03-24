@@ -175,22 +175,22 @@ export default function Home() {
         setIsFilled(checkIsFilled());
     }, [checkIsFilled, inputs]);
 
-    useEffect(() => {
-        const decreaseTimer = () => {
-            if (timer <= -1) {
-                setTimer(15);
-                setStage((prevStage) => prevStage + 1);
-            } else {
-                setTimer((prevTimer) => {
-                    return prevTimer - 1;
-                });
-            }
-        };
+    // useEffect(() => {
+    //     const decreaseTimer = () => {
+    //         if (timer <= -1) {
+    //             setTimer(15);
+    //             setStage((prevStage) => prevStage + 1);
+    //         } else {
+    //             setTimer((prevTimer) => {
+    //                 return prevTimer - 1;
+    //             });
+    //         }
+    //     };
 
-        const intervalId = setInterval(decreaseTimer, 100);
+    //     const intervalId = setInterval(decreaseTimer, 100);
 
-        return () => clearInterval(intervalId);
-    }, [timer]);
+    //     return () => clearInterval(intervalId);
+    // }, [timer]);
 
     useEffect(() => {
         if (stage >= lyrics.length) {
@@ -201,22 +201,26 @@ export default function Home() {
             });
             ws.send(jsonString);
         }
-    }, [lyrics.length, router, stage]);
+    }, [inputs, lyrics.length, router, stage, ws]);
 
     useEffect(() => {
         if (stage >= lyrics.length) {
             router.push("/song");
         }
-    }, [stage]);
+    }, [lyrics.length, router, stage]);
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-between p-24">
-            {false && feedback === "loading" ? (
-                <div className="flex-center my-auto flex-col space-y-4">
-                    <Loader className="animate-spin w-20 h-20 transition duration-3000" />
-                    <p className="text-2xl font-semibold">
-                        Generating your Mad Lyrics! Hang tight 😼
-                    </p>
+            {true && feedback === "loading" ? (
+                <div className="flex-center my-auto flex-col space-y-4 text-white">
+                    <Loader className="animate-spin w-24 h-24 transition duration-3000" />
+                    <span className="text-3xl font-semibold">
+                        Generating your{" "}
+                        <span className="text-jas-purple font-bold">
+                            Mad Lyrics!
+                        </span>{" "}
+                        Hang tight 😼
+                    </span>
                 </div>
             ) : (
                 <>
