@@ -66,7 +66,7 @@ export default function Lobby() {
         ws.send(
             JSON.stringify({
                 event: "emotion",
-                genre: newVal,
+                emotion: newVal,
                 id: ws.id,
             }),
         );
@@ -77,7 +77,7 @@ export default function Lobby() {
         ws.send(
             JSON.stringify({
                 event: "topic",
-                genre: newVal,
+                topic: newVal,
                 id: ws.id,
             }),
         );
