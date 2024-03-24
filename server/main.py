@@ -1,6 +1,8 @@
 from fastapi import FastAPI, WebSocket
 from pydantic import BaseModel
 import openai
+
+from suno import SongsGen
 from dotenv import load_dotenv
 import os
 
@@ -24,6 +26,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+SUNO_COOKIE = os.getenv("SUNO_COOKIE")
+i = SongsGen(SUNO_COOKIE)
+print(i.get_limit_left())
 
 openai.api_key = os.getenv("OPEN_AI_API_KEY")
 
@@ -85,7 +91,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
         while True:
             binary_data = await websocket.receive_bytes()
             await manager.broadcast(binary_data) 
-
+            audio = i.get_mp3(link, stream=False)
+            
     except WebSocketDisconnect:
         print("Disconnecting...")
         manager.disconnect(client_id)
@@ -98,6 +105,7 @@ async def get_lyrics():
         {"role": "system", "content": "You are a intelligent assistant."},
 
         {"role": "user", "content": """
+You will generate a mad-libs puzzle and output the mad-libs in a JSON schema. Here is an example of the JSON schema I want:
 [
   {
     "part": "Verse",
@@ -136,7 +144,7 @@ async def get_lyrics():
     ]
   }
 ]
-Generate new JSON lyrics following the same schema. Continue to replace words/phrases in each line with mad-libs, annotated by the proper type of speech ie. {noun}. Make four verses.
+Create new, unique lyrics following the same JSON schema. The lyrics themselves should be quite different from what I put. The mad libs should be annotated by the proper type of speech ie. {noun}. Make four verses.
 """}
     ]
     chat = openai.chat.completions.create( 
