@@ -97,6 +97,25 @@
     max-width: 40vw;
     gap: 26px;
 }
+.profile-contain {
+    width: 100%;
+    background-color: #191b21;
+    display: grid;
+    place-content: center;
+    padding: 28px;
+    border-radius: 58px;
+}
+.profile-contain .row {
+    justify-content: flex-start;
+    align-items: start;
+    display: flex;
+    flex-direction: row;
+}
+.column {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
 h2 {
     font-family: "Poppins", sans-serif;
     font-weight: 800;

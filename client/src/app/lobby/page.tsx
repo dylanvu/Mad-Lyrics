@@ -30,8 +30,8 @@ export default function Lobby() {
             {/* <div className="main-div">lobby</div>
             <Button onClick={handleStart}>Start Game</Button>
             <p>{ws.ready ? "Connected!" : "Not connected )="}</p> */}
-
-            <div className="flex-between h-full min-w-[500px] flex-col rounded-3xl bg-[#191B21] px-9 pb-9 pt-12 text-white">
+            <div className="column">
+              <div className="flex-between h-full min-w-[500px] flex-col rounded-3xl bg-[#191B21] px-9 pb-9 pt-12 text-white">
                 {/* lobby tag */}
                 <div className="w-full">
                     <div className="flex-between pb-8">
@@ -89,7 +89,22 @@ export default function Lobby() {
                         />
                     </div>
                 </div>
+                <div className="row">
+                    <img
+                        src="./images/cat.svg"
+                        alt="cat"
+                        style={{ height: "40px" }}
+                    />
+                    <p
+                        className="text-3xl font-bold"
+                        style={{ color: "#fff", fontSize: "22px" }}
+                    >
+                        SuperEpicGamer
+                    </p>
+                </div>
+            </div>  
             </div>
+            
 
             <div className="flex-center mb-auto w-full flex-col">
                 <h1
