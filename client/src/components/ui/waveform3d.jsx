@@ -37,10 +37,9 @@ const WaveForm3D = ({ analyzerData }) => {
         const spikes = [];
 
         const spikeRadius = 2;
-        const sphereRadius = 20; // Radius of the sphere that the spikes will cover
         const ringRadius = 20; // Radius of the ring that the spikes will cover
-        const numSpikes = 200; // Total number of spikes
-        const numSpikesRing = 20;
+        const numSpikes = 600; // Total number of spikes
+        const numSpikesRing = 15;
 
         const sphereGeometry = new THREE.SphereGeometry(10, 32, 32);
         const sphereMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
@@ -49,43 +48,26 @@ const WaveForm3D = ({ analyzerData }) => {
         // Determine how many frequency data points each spike will represent
         const dataPointsPerSpike = Math.floor(dataArray.length / numSpikes);
 
-        // for (let i = 0; i < numSpikes; i++) {
-        //     const geometry = new THREE.ConeGeometry(spikeRadius, 1, 32);
-        //     const material = new THREE.MeshPhongMaterial({
-        //         color: new THREE.Color(
-        //             `hsl(${(i * 360) / numSpikes}, 100%, 70%)`
-        //         ),
-        //         emissive: new THREE.Color(
-        //             `hsl(${(i * 360) / numSpikes}, 100%, 50%)`
-        //         ),
-        //     });
-        //     const spike = new THREE.Mesh(geometry, material);
-
-        //     // Use spherical coordinates to position the spikes evenly on the sphere surface
-        //     const theta = Math.acos(1 - (2 * i) / numSpikes);
-        //     const phi = Math.sqrt(numSpikes * Math.PI) * theta;
-        //     spike.position.setFromSphericalCoords(sphereRadius, theta, phi);
-
-        //     spike.lookAt(new THREE.Vector3(0, 0, 0));
-        //     spike.rotateX(Math.PI / 2);
-        //     spike.rotateZ(Math.PI);
-
-        //     scene.add(spike);
-        //     spikes.push(spike);
-        // }
-
         const numOrbits = 3; // Number of orbits
+
+        const orbitSpeeds = [0.015, 0.01, 0.005]; // Adjust the speeds as desired
+        const orbitGroups = [];
 
         let spikeIndex = 0;
         for (let i = 0; i < numOrbits; i++) {
-            const orbitRadius = ringRadius + i * 20; // Adjust the orbit radius as needed
-            const orbitAngle = Math.random() * Math.PI * 2; // Random starting angle for each orbit
-            const spikesPerOrbit = numSpikesRing * (i + 1); // Increase spikes per orbit for each orbit
+            const orbitRadius = ringRadius + i * 15;
+            const orbitAngle = Math.random() * Math.PI * 2;
+
+            const spikesPerOrbit = numSpikesRing * (i + 1);
+
+            const orbitGroup = new THREE.Group();
+            orbitGroups.push(orbitGroup);
+            scene.add(orbitGroup);
 
             for (let j = 0; j < spikesPerOrbit; j++) {
                 const geometry = new THREE.ConeGeometry(
                     spikeRadius,
-                    0.4 * (i + 1),
+                    0.2 * (i + 1),
                     32
                 );
                 const material = new THREE.MeshPhongMaterial({
@@ -101,13 +83,14 @@ const WaveForm3D = ({ analyzerData }) => {
                 const angle = orbitAngle + (j / spikesPerOrbit) * Math.PI * 2;
                 spike.position.x = Math.cos(angle) * orbitRadius;
                 spike.position.y = Math.sin(angle) * orbitRadius;
+                orbitGroups[i].add(spike);
 
                 spike.lookAt(new THREE.Vector3(0, 0, 0));
                 spike.rotateX(Math.PI / 2);
                 spike.rotateY(Math.PI);
                 spike.rotateZ(Math.PI);
 
-                scene.add(spike);
+                // scene.add(spike);
                 spikes.push(spike);
 
                 spikeIndex++;
@@ -125,6 +108,18 @@ const WaveForm3D = ({ analyzerData }) => {
 
             analyzer.getByteFrequencyData(dataArray);
 
+            orbitGroups.forEach((group, i) => {
+                if (i == 0) {
+                    group.rotation.x += orbitSpeeds[i];
+                }
+                if (i == 1) {
+                    group.rotation.z -= orbitSpeeds[i];
+                }
+                if (i == 2) {
+                    group.rotation.z += orbitSpeeds[i];
+                }
+            });
+
             // Update each spike based on the average value of its corresponding frequency data points
             spikes.forEach((spike, index) => {
                 let sum = 0;
@@ -132,7 +127,7 @@ const WaveForm3D = ({ analyzerData }) => {
                     sum += dataArray[index * dataPointsPerSpike + j];
                 }
                 const average = sum / dataPointsPerSpike;
-                const height = (average / 128.0) * 10 + 1; // Dynamic height based on frequency data
+                const height = Math.pow(average / 128.0, 3) * 10; // Square the ratio for exponential growth
                 spike.scale.set(1, height, 1); // Animate height, keeping base size fixed
             });
 
