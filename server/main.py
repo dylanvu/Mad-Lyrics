@@ -109,42 +109,15 @@ You will generate a mad-libs puzzle and output the mad-libs in a JSON schema. He
 [
   {
     "part": "Verse",
-    "lyrics": [
-      "The stars at night, they shine so {adjective},",
-      "Guiding me through the {noun} so {adjective}.",
-      "My {noun} by my side, steady and {adjective},",
-      "Through the silent streets, our spirits {verb}."
-    ]
+    "lyrics": string[]
   },
-  {
-    "part": "Chorus",
-    "lyrics": [
-      "With every heartbeat, I feel {adjective},",
-      "In a world where {noun} often {verb}.",
-      "But in your {noun}, I find my {noun},",
-      "And in your eyes, the {noun} I've always {verb}."
-    ]
-  },
-  {
-    "part": "Bridge",
-    "lyrics": [
-      "In the quiet of the {noun}, we {verb},",
-      "To the music that makes our souls {verb},",
-      "Hand in hand, we {verb} and {verb},",
-      "In our {noun} world, where love never {verb}."
-    ]
-  },
-  {
-    "part": "Outro",
-    "lyrics": [
-      "So here's to our {noun}, our bond, and our {noun},",
-      "In this journey, we're never {adjective}.",
-      "From {noun} to {noun}, under the {noun}'s glow,",
-      "Together, into the future we {verb}."
-    ]
-  }
 ]
-Create new, unique lyrics following the same JSON schema. The lyrics themselves should be quite different from what I put. The mad libs should be annotated by the proper type of speech ie. {noun}. Make four verses.
+Create lyrics following the same JSON schema. The lyrics themselves should be quite different from what I put, as well as the mad libs. My example only applies to the JSON format. The mad libs should be annotated by the proper type of speech ie. {noun}. The valid parts of speech are: noun, adjective, verb, and adverb. 
+
+Make four verses: Verse, Chorus, Bridge,  and Outro. Each verses will have 4 lines.
+Never have two mad-libs next to each other in the same line. For example, {adjective} {noun} is invalid.
+
+Have only 1 mad lib per line. There must be 1 mad-lib per line.
 """}
     ]
     chat = openai.chat.completions.create( 
