@@ -31,6 +31,7 @@ interface ISocketContext {
     id: string;
     songData: string;
     audioQueueRef: any;
+    data: boolean;
 }
 
 const startingPhase = "lobby";
@@ -44,6 +45,7 @@ export const WebsocketContext = createContext<ISocketContext>({
     id: "",
     songData: "",
     audioQueueRef: [],
+    data: false,
 });
 
 export const WebsocketProvider = ({
@@ -56,6 +58,7 @@ export const WebsocketProvider = ({
     const [client_id, setClientId] = useState("");
     const [currentPhase, setPhase] = useState<validPhases>(startingPhase);
     const [songData, setSongData] = useState("");
+    const [data, setData] = useState(false);
     const audioQueueRef = useRef<any>([]);
 
     const ws = useRef<WebSocket | null>(null);
@@ -67,8 +70,8 @@ export const WebsocketProvider = ({
         console.log(id);
 
         socket.onopen = () => {
-            console.log("Connected")
-            setIsReady(true)
+            console.log("Connected");
+            setIsReady(true);
         };
         socket.onclose = () => setIsReady(false);
         // socket.onmessage = (event) => setVal(event.data);
@@ -79,12 +82,13 @@ export const WebsocketProvider = ({
                 // if this is audio data, add it to the audio queue
                 // Emit a custom event with the audio data that the AudioPlayer can listen to
                 const audioArrayBuffer = base64ToArrayBuffer(
-                    eventObject.audio_data
+                    eventObject.audio_data,
                 );
                 const audioBlob = new Blob([audioArrayBuffer], {
                     type: "audio/mp3",
                 });
                 audioQueueRef.current.push(audioBlob);
+                setData(true);
             } else if (eventObject.event === "phase_change") {
                 setPhase(eventObject.data);
             } else if (eventObject.event === "lyrics") {
@@ -131,6 +135,7 @@ export const WebsocketProvider = ({
         id: client_id,
         songData: songData,
         audioQueueRef: audioQueueRef,
+        data: data,
     };
 
     return (

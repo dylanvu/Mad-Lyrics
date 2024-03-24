@@ -268,6 +268,11 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                             b64 = base64.b64encode(chunk)
                             # decodes the b.64 binary obj into a string
                             utf = b64.decode('utf-8')
+                            
+                            # # DEBUG: Open the file at file_path in write mode ('w') and write the string_to_save to it
+                            # with open("./output.txt", 'w', encoding='utf-8') as file:
+                            #     file.write(utf)
+
                             # creates a dict obj that stores the event as an audio chunk and sets the audio data to utf format
                             obj = {
                                 "event": "audio",
@@ -330,33 +335,6 @@ async def get_lyrics():
 #     reply = chat.choices[0].message.content 
     reply = """
 [
-  {
-    "part": "Verse",
-    "lyrics": [
-      "The wind in the night, it whispers so {adjective},",
-      "Carrying tales from the {noun} so {adjective}.",
-      "My {noun} in my hand, ancient and {adjective},",
-      "Across the endless fields, our shadows {verb}."
-    ]
-  },
-  {
-    "part": "Chorus",
-    "lyrics": [
-      "With every step, I grow {adjective},",
-      "In a realm where {noun} softly {verb}.",
-      "But by your {noun}, I sail my {noun},",
-      "And in your voice, the {noun} I've long {verb}."
-    ]
-  },
-  {
-    "part": "Bridge",
-    "lyrics": [
-      "Under the gaze of the {noun}, we {verb},",
-      "To the rhythm that makes our hearts {verb},",
-      "Side by side, we {verb} and {verb},",
-      "In this {noun} dream, where hope brightly {verb}."
-    ]
-  },
   {
     "part": "Outro",
     "lyrics": [

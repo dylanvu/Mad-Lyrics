@@ -295,9 +295,9 @@ class SongsGen:
         response = self.session.get(link, stream=True)
         if response.status_code == 200:
             if stream:
-                return response.iter_content(chunk_size=1024)
+                return response.iter_content()
             else:
-                return b"".join(response.iter_content(chunk_size=1024))
+                return b"".join(response.iter_content())
         else:
             raise Exception(f"Failed to download MP3 from {link}, status code: {response.status_code}")
 
