@@ -138,6 +138,10 @@ export const WebsocketProvider = ({
                     console.log("Queueing audio data");
                     setAudioDataQueue([...audioDataQueue, audioArrayBuffer]);
                 }
+                setFinishedSongData({
+                    title: eventObject.title,
+                    lyrics: eventObject.lyrics,
+                });
             } else if (eventObject.event === "phase_change") {
                 setPhase(eventObject.data);
             } else if (eventObject.event === "lyrics") {
