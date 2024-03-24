@@ -30,8 +30,8 @@ interface ISocketContext {
     phase: validPhases;
     id: string;
     songData: string;
-    audioQueueRef: any;
-    data: boolean;
+    mediaSource: MediaSource | null;
+    sourceBuffer: SourceBuffer | null;
 }
 
 const startingPhase = "lobby";
@@ -44,8 +44,8 @@ export const WebsocketContext = createContext<ISocketContext>({
     phase: startingPhase,
     id: "",
     songData: "",
-    audioQueueRef: [],
-    data: false,
+    mediaSource: null,
+    sourceBuffer: null,
 });
 
 export const WebsocketProvider = ({
@@ -58,10 +58,46 @@ export const WebsocketProvider = ({
     const [client_id, setClientId] = useState("");
     const [currentPhase, setPhase] = useState<validPhases>(startingPhase);
     const [songData, setSongData] = useState("");
-    const [data, setData] = useState(false);
-    const audioQueueRef = useRef<any>([]);
 
     const ws = useRef<WebSocket | null>(null);
+
+    const [mediaSource, setMediaSource] = useState<MediaSource | null>(null);
+    const sourceBuffer = useRef<SourceBuffer | null>(null);
+    const [audioDataQueue, setAudioDataQueue] = useState([]);
+
+    useEffect(() => {
+        const ms = new MediaSource();
+        setMediaSource(ms);
+
+        ms.addEventListener("sourceopen", () => {
+            try {
+                const mimeType = "audio/mpeg";
+                const sb = ms.addSourceBuffer(mimeType);
+                sourceBuffer.current = sb;
+                console.log("SourceBuffer created:", sb);
+
+                // Once the SourceBuffer is ready, process any queued audio data
+                audioDataQueue.forEach((data) => {
+                    console.log("Processing queued audio data");
+                    sb.appendBuffer(data);
+                });
+                // Clear the queue
+                setAudioDataQueue([]);
+
+                // Listen for when the SourceBuffer is ready for more data
+                sb.addEventListener("updateend", () => {
+                    if (audioDataQueue.length > 0) {
+                        console.log("Processing queued audio data");
+                        const nextData = audioDataQueue.shift();
+                        sb.appendBuffer(nextData);
+                        setAudioDataQueue(audioDataQueue.slice(1)); // Update the queue state
+                    }
+                });
+            } catch (e) {
+                console.error("Error creating SourceBuffer:", e);
+            }
+        });
+    }, []);
 
     useEffect(() => {
         const id = v4();
@@ -78,17 +114,18 @@ export const WebsocketProvider = ({
         socket.onmessage = (event) => {
             const eventObject = JSON.parse(event.data);
             if (eventObject.event === "audio") {
-                console.log("audio received");
-                // if this is audio data, add it to the audio queue
-                // Emit a custom event with the audio data that the AudioPlayer can listen to
+                console.log("audio event");
                 const audioArrayBuffer = base64ToArrayBuffer(
                     eventObject.audio_data,
                 );
-                const audioBlob = new Blob([audioArrayBuffer], {
-                    type: "audio/mp3",
-                });
-                audioQueueRef.current.push(audioBlob);
-                setData(true);
+                console.log(sourceBuffer.current);
+                if (sourceBuffer.current && !sourceBuffer.current.updating) {
+                    sourceBuffer.current.appendBuffer(audioArrayBuffer);
+                } else {
+                    // Queue the data if the SourceBuffer isn't ready
+                    console.log("Queueing audio data");
+                    setAudioDataQueue([...audioDataQueue, audioArrayBuffer]);
+                }
             } else if (eventObject.event === "phase_change") {
                 setPhase(eventObject.data);
             } else if (eventObject.event === "lyrics") {
@@ -134,8 +171,8 @@ export const WebsocketProvider = ({
         phase: currentPhase,
         id: client_id,
         songData: songData,
-        audioQueueRef: audioQueueRef,
-        data: data,
+        mediaSource: mediaSource,
+        sourceBuffer: sourceBuffer.current,
     };
 
     return (

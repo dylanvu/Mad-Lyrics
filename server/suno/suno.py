@@ -95,7 +95,7 @@ class SongsGen:
         response = self.session.get(url, impersonate=browser_version)
 
         try:
-            print(response.json())
+            print("Fetch songs unauth" + str(response.json()))
             data = response.json()[0]
         except:
             if response.json().get("detail", "") == "Unauthorized":

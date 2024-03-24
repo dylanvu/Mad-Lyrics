@@ -26,11 +26,10 @@ const LoadingPage = () => {
     }, []);
 
     return (
-        <div className="flex min-h-screen flex-col items-center px-32 pb-9 pt-12 text-white">
+        <div className="fixed left-0 top-0 z-50 flex min-h-screen w-full flex-col items-center justify-center bg-black px-32 pb-9 pt-12 text-white">
             <div className="flex-center w-full rounded-2xl bg-jas-card p-6 text-2xl font-bold text-white">
                 <h6>Generating your next favorite tune...</h6>
             </div>
-
             <div className="flex-center flex-col pt-6">
                 <img
                     src="./loading_cat.gif"
@@ -47,12 +46,10 @@ const LoadingPage = () => {
                     </p>
                 </div>
             </div>
-
             <Progress
                 value={progress}
                 className="my-8 h-8 w-[700px] transition duration-2000"
             />
-
             <div className="h-[300px] w-[700px] space-y-4 rounded-2xl border-4 border-jas-gray py-7">
                 <h6 className="text-center text-3xl font-semibold">
                     # of Mad Lyrics
@@ -97,52 +94,25 @@ const LoadingPage = () => {
 
 const Page = () => {
     const ws = useContext(WebsocketContext);
-
-    const isPlaying = useRef(false);
-    const audioContext = useRef();
     const [loading, setLoading] = useState(true);
+    const audioElementRef = useRef(null);
 
     useEffect(() => {
-        playNextAudio();
-    }, [ws.audioQueueRef.current, ws.data]);
-
-    useEffect(() => {
-        audioContext.current = new (window.AudioContext ||
-            window.webkitAudioContext)();
-    }, []);
-
-    const playNextAudio = () => {
-        console.log("called function");
-        console.log("len check", ws.audioQueueRef.current.length > 0);
-        console.log("playing check", !isPlaying.current);
-
-        if (ws.audioQueueRef.current.length > 0 && !isPlaying.current) {
+        if (ws.phase === "song") {
             setLoading(false);
-            console.log("playing");
-            isPlaying.current = true;
-            const audioBlob = ws.audioQueueRef.current.shift(); // Get the next audio blob from the queue
-            const reader = new FileReader();
-            reader.onload = function () {
-                const arrayBuffer = this.result;
-                console.log(arrayBuffer);
-                audioContext.current.decodeAudioData(arrayBuffer, (buffer) => {
-                    const source = audioContext.current.createBufferSource();
-                    source.buffer = buffer;
-                    source.connect(audioContext.current.destination);
-                    source.onended = () => {
-                        isPlaying.current = false; // Reset the flag when audio ends
-                        playNextAudio(); // Try to play the next audio
-                    };
-                    source.start(0);
-                });
-            };
-            reader.readAsArrayBuffer(audioBlob);
         }
-    };
+    }, [ws.phase]);
 
-    if (loading) {
-        return <LoadingPage />;
-    }
+    useEffect(() => {
+        if (ws.mediaSource && audioElementRef.current) {
+            const objectURL = URL.createObjectURL(ws.mediaSource);
+            audioElementRef.current.src = objectURL;
+
+            return () => {
+                URL.revokeObjectURL(objectURL); // Clean up when the component unmounts or the source changes
+            };
+        }
+    }, [ws.mediaSource, audioElementRef.current]);
 
     return (
         <div className="flex max-h-screen min-h-screen flex-row gap-20 px-32 pb-9 pt-12 text-white">
@@ -159,7 +129,8 @@ const Page = () => {
                     /> */}
 
                     <div className="flex-center h-[500px] w-[600px] rounded-xl pt-16">
-                        {/* <Visualizer /> */}
+                        
+                        <Visualizer audioRef={audioElementRef} />
                     </div>
 
                     <h6 className="py-4 text-center text-6xl font-bold">
@@ -213,6 +184,7 @@ const Page = () => {
                     </div>
                 </div>
             </div>
+            {loading && <LoadingPage />}
         </div>
     );
 };

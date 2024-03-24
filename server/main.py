@@ -7,6 +7,7 @@ import json
 import re
 import random
 from io import BytesIO
+import asyncio
 
 from suno import SongsGen
 from dotenv import load_dotenv
@@ -259,6 +260,14 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                     print("LYRICS: " + replaced_lyrics)
                     print("GENRE: " + genre)
                     output = GenerateSong.get_songs_custom(replaced_lyrics, genre)
+                    
+                    obj = {
+                        "event": "phase_change",
+                        "data": "song"
+                    }
+                    
+                    await manager.broadcast(obj)
+                    await asyncio.sleep(1)
                     # returns a link from the "song url" element inside of the output item in dictionary, stored in link. The first element in the array
                     link = output['song_urls'][0]
                     # gets the mp3 associated with each link and sets streaming in websocket to true, meaning that data is sent in chunks
@@ -354,6 +363,33 @@ async def get_lyrics():
 #     reply = chat.choices[0].message.content 
     reply = """
 [
+  {
+    "part": "Verse",
+    "lyrics": [
+      "The wind in the night, it whispers so {adjective},",
+      "Carrying tales from the {noun} so {adjective}.",
+      "My {noun} in my hand, ancient and {adjective},",
+      "Across the endless fields, our shadows {verb}."
+    ]
+  },
+  {
+    "part": "Chorus",
+    "lyrics": [
+      "With every step, I grow {adjective},",
+      "In a realm where {noun} softly {verb}.",
+      "But by your {noun}, I sail my {noun},",
+      "And in your voice, the {noun} I've long {verb}."
+    ]
+  },
+  {
+    "part": "Bridge",
+    "lyrics": [
+      "Under the gaze of the {noun}, we {verb},",
+      "To the rhythm that makes our hearts {verb},",
+      "Side by side, we {verb} and {verb},",
+      "In this {noun} dream, where hope brightly {verb}."
+    ]
+  },
   {
     "part": "Outro",
     "lyrics": [
