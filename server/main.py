@@ -123,13 +123,16 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                 # })
             elif event == "sample_song":
                 path_to_song = './output/1.mp3'
-                with open(song_path, 'rb') as mp3_file:
+                # rb is reading the file in bits and bytes
+                with open(path_to_song, 'rb') as mp3_file:
                     while True:
                         # reading data in chunks of 4kb
                         chunk = mp3_file.read(4096)
                         if not chunk:
                             break
+                        #translates bits and bytes into text
                         b64 = base64.b64encode(chunk)
+                        # translates the text into a universally understandable language for diff computers
                         utf = b64.decode('utf-8')
                         obj = {
                             "event": "audio",
