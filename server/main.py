@@ -51,6 +51,7 @@ class ConnectionManager:
         self.player_inputs: Dict[str, List[List[str]]] = {}
         self.currentLyrics: str = ""
         self.num_inputs = 0
+        self.order_players_by_arrival: List[str] = []
 
     # establish connection btwn a client and ws. waits for ws to start and adds accepted client to active connections
     async def connect(self, websocket: WebSocket, client_id: str):
@@ -58,13 +59,28 @@ class ConnectionManager:
         self.active_connections[client_id] = websocket
         self.ready_players[client_id] = False
         self.player_inputs[client_id] = []
+        self.order_players_by_arrival.append(client_id)
         print(self.active_connections)
+        # send the new connections
+        obj = {
+            "event": "connection",
+            "players": self.order_players_by_arrival
+        }
+        await self.broadcast(obj)
+        
     # disconnects client from ws
-    def disconnect(self, client_id: str):
+    async def disconnect(self, client_id: str):
         del self.active_connections[client_id]
         del self.ready_players[client_id]
         del self.player_inputs[client_id]
         print(self.active_connections)
+        # remove player order
+        self.order_players_by_arrival = [s for s in self.order_players_by_arrival if s != client_id]
+        obj = {
+            "event": "connection",
+            "players": self.order_players_by_arrival
+        }
+        await self.broadcast(obj)
     #  converts music into binary which it then sends as bytes
     async def send_personal_message(self, data: dict, websocket: WebSocket):
         await websocket.send_json(data)
