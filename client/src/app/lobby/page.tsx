@@ -69,7 +69,7 @@ export default function Lobby() {
             ) : (
                 <>
                     <div className="column">
-                        <div className="flex-between h-full min-w-[500px] flex-col rounded-3xl bg-[#191B21] px-9 pb-9 pt-12 text-white">
+                        <div className="flex-between h-full w-[36vw] flex-col rounded-3xl bg-[#191B21] px-9 pb-9 pt-12 text-white">
                             {/* lobby tag */}
                             <div className="w-full">
                                 <div className="flex-between pb-8">

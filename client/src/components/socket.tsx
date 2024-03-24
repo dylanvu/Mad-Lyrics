@@ -114,7 +114,9 @@ export const WebsocketProvider = ({
     useEffect(() => {
         const id = v4();
         setClientId(id);
-        const socket = new WebSocket(`ws://localhost:8000/ws?client_id=${id}`);
+        const socket = new WebSocket(
+            `wss://23720bc482ee.ngrok.app/ws?client_id=${id}`,
+        );
         console.log(id);
 
         socket.onopen = () => {

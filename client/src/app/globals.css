@@ -98,12 +98,20 @@
     gap: 26px;
 }
 .profile-contain {
-    width: 100%;
     background-color: #191b21;
-    display: grid;
-    place-content: center;
+    align-items: start;
+    justify-content: left;
     padding: 28px;
-    border-radius: 58px;
+    border-radius: 28px;
+    width: 36vw;
+    display: flex;
+}
+.profile-contain .heading {
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    justify-content: start;
+    gap: 12px;
 }
 .profile-contain .row {
     justify-content: flex-start;
@@ -115,6 +123,7 @@
     display: flex;
     flex-direction: column;
     gap: 22px;
+    width: 30vw;
 }
 h2 {
     font-family: "Poppins", sans-serif;
