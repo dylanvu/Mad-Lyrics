@@ -20,12 +20,6 @@ export default function Lobby() {
     const ws = useContext(WebsocketContext);
     const router = useRouter();
 
-    const [players, setPlayers] = useState<string[]>([
-        "fsdfsdf",
-        "joe",
-        "supergirlygmaer",
-    ]);
-
     const [loading, setLoading] = useState(false);
 
     const handleStart = () => {
@@ -35,12 +29,6 @@ export default function Lobby() {
         });
         ws.send(jsonString);
     };
-
-    useEffect(() => {
-        setPlayers(players);
-
-        console.log(players);
-    }, [players, ws.players]);
 
     useEffect(() => {
         if (ws.phase === "input") {
@@ -121,12 +109,12 @@ export default function Lobby() {
                                         )}
                                     </h2>
                                     <p className="text-2xl font-bold">
-                                        3 players
+                                        {ws.players.length} players
                                     </p>
                                 </div>
 
                                 <div className="mb-auto space-y-4">
-                                    {players.map((player) => (
+                                    {ws.players.map((player) => (
                                         <div
                                             className="flex-between rounded-2xl border-4 border-jas-gray bg-jas-card p-4 py-1 text-white hover:border-jas-purple"
                                             key={player}
