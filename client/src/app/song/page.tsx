@@ -1,6 +1,7 @@
 "use client";
 
 import { WebsocketContext } from "@/components/socket";
+import { Loader } from "lucide-react";
 import React, { useContext, useEffect, useState } from "react";
 
 const test64 =
@@ -23,19 +24,27 @@ const Page = () => {
     const ws = useContext(WebsocketContext);
 
     const [audioChunk, setAudioChunk] = useState<string>("");
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (ws.valueQueue.length) {
             setAudioChunk(ws.valueQueue[0]);
+            setLoading(false);
         }
     }, [ws.valueQueue]);
 
     return (
         <div>
-            {audioChunk && audioChunk.length > 0 ? (
+            {loading ||
+            audioChunk === undefined ||
+            audioChunk === null ||
+            audioChunk.length === 0 ? (
+                <Loader className="animate-spin w-20 h-20 transition duration-3000" />
+            ) : (
                 <Base64AudioPlayer base64String={audioChunk} />
-            ) : null}
-            <button
+            )}
+
+            {/* <button
                 onClick={() => {
                     const jsonString: string = JSON.stringify({
                         event: "sample_song",
@@ -44,7 +53,7 @@ const Page = () => {
                 }}
             >
                 TEST
-            </button>
+            </button> */}
         </div>
     );
 };

@@ -154,8 +154,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                 #     "data": lyrics
                 # })
             elif event == "sample_song":
-                print("Getting sample song")
-                path_to_song = './output/1 .mp3'
+                print("Getting sample song manually")
+                path_to_song = './output/2 .mp3'
                 with open(path_to_song, 'rb') as mp3_file:
                     # reading data in chunks of 4kb
                     chunk = mp3_file.read()
@@ -168,12 +168,12 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                         "audio_data": utf
                     }
                     await manager.broadcast(obj)
-                    # move all players to the song page
-                    obj = {
-                        "event": "phase_change",
-                        "data": "song"
-                    }
-                    await manager.broadcast(obj)
+                    # # move all players to the song page
+                    # obj = {
+                    #     "event": "phase_change",
+                    #     "data": "song"
+                    # }
+                    # await manager.broadcast(obj)
                     # while True:
                     #     # reading data in chunks of 4kb
                     #     chunk = mp3_file.read(4096)
@@ -208,11 +208,26 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                     print("READY TO GENERATE")
                     print(manager.player_inputs)
                     # TODO: need to randomly select from inputs
-                    # obj = {
-                    # "event": "phase_change",
-                    # "data": "song"
-                    # }
-                    # await manager.broadcast(obj)
+
+                    # TODO: need to call Suno
+
+                    # TODO: need to send data back
+
+                    # TODO: Remove sample song
+                    print("Getting sample song")
+                    path_to_song = './output/2 .mp3'
+                    with open(path_to_song, 'rb') as mp3_file:
+                        # reading data in chunks of 4kb
+                        chunk = mp3_file.read()
+                        if not chunk:
+                            break
+                        b64 = base64.b64encode(chunk)
+                        utf = b64.decode('utf-8')
+                        obj = {
+                            "event": "audio",
+                            "audio_data": utf
+                        }
+                        await manager.broadcast(obj)
 
     except WebSocketDisconnect:
         print("Disconnecting...")
