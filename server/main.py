@@ -6,6 +6,7 @@ import base64
 import json
 import re
 import random
+from io import BytesIO
 
 from suno import SongsGen
 from dotenv import load_dotenv
@@ -262,24 +263,42 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                     link = output['song_urls'][0]
                     # gets the mp3 associated with each link and sets streaming in websocket to true, meaning that data is sent in chunks
                     audio = GenerateSong.get_mp3(link, stream=True)
-                    for chunk in audio:
-                        if chunk:
-                            # translates binary to base64 string
-                            b64 = base64.b64encode(chunk)
-                            # decodes the b.64 binary obj into a string
-                            utf = b64.decode('utf-8')
-                            
-                            # # DEBUG: Open the file at file_path in write mode ('w') and write the string_to_save to it
-                            # with open("./output.txt", 'w', encoding='utf-8') as file:
-                            #     file.write(utf)
+                    buffer = BytesIO()
+                    desired_chunk_size = 48000
+                    async def process_and_send_large_chunk():
+                        # Check if the buffer has enough data to process
+                        # You can adjust the size check as needed
+                        if buffer.getbuffer().nbytes >= desired_chunk_size:
+                            # Reset buffer position to the start
+                            buffer.seek(0)
 
-                            # creates a dict obj that stores the event as an audio chunk and sets the audio data to utf format
+                            # Read the data from the buffer
+                            large_chunk = buffer.read()
+
+                            # Translate binary to base64 string
+                            b64 = base64.b64encode(large_chunk)
+
+                            # Decode the base64 binary object into a string
+                            utf = b64.decode('utf-8')
+
+                            # Create a dict object that stores the event as an audio chunk and sets the audio data to utf format
                             obj = {
                                 "event": "audio",
                                 "audio_data": utf
                             }
-                            # waits for broadcasting to run
+                            
+                            # Wait for broadcasting to run
                             await manager.broadcast(obj)
+                            
+                            # Clear the buffer after sending
+                            buffer.seek(0)
+                            buffer.truncate()
+                    for chunk in audio:
+                        if chunk:
+                            # translates binary to base64 string
+                            buffer.write(chunk)
+                            
+                            await process_and_send_large_chunk()
                     
                     
 
@@ -369,3 +388,4 @@ async def get_lyrics():
 
 def generate_random_number(upper_limit):
     return random.randrange(0, upper_limit)
+
