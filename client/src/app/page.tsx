@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 import { WebsocketContext } from "@/components/socket";
+import { cn } from "@/lib/utils";
 
 interface LyricPart {
     part: string;
@@ -110,6 +111,8 @@ export default function Home() {
     const [stage, setStage] = useState(0);
     const [isFilled, setIsFilled] = useState(false);
 
+    const [timer, setTimer] = useState(15);
+
     const handleInputChange = (
         props: MadlibLineProps,
         e: ChangeEvent<HTMLInputElement>,
@@ -150,6 +153,25 @@ export default function Home() {
     useEffect(() => {
         setIsFilled(checkIsFilled());
     }, [checkIsFilled, inputs]);
+
+    useEffect(() => {
+        const decreaseTimer = () => {
+            if (timer <= 0) {
+                setTimeout(() => {
+                    // setStage((prevStage) => prevStage + 1);
+                    setTimer(15);
+                }, 750);
+            } else {
+                setTimer((prevTimer) => {
+                    return prevTimer - 1;
+                });
+            }
+        };
+
+        const intervalId = setInterval(decreaseTimer, 250);
+
+        return () => clearInterval(intervalId);
+    }, [timer]);
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-between p-24">
@@ -230,13 +252,25 @@ export default function Home() {
                             </div>
 
                             <Button
-                                onClick={() =>
-                                    setStage((prevStage) => prevStage + 1)
-                                }
+                                onClick={() => {
+                                    setStage((prevStage) => prevStage + 1);
+                                    setTimer(15);
+                                }}
                                 disabled={!isFilled}
                             >
                                 Submit
                             </Button>
+
+                            <div className="flex-center mx-auto pt-24">
+                                <p
+                                    className={cn(
+                                        "text-3xl",
+                                        timer <= 5 && "text-[#FF0000]",
+                                    )}
+                                >
+                                    {timer}
+                                </p>
+                            </div>
                         </div>
                     );
                 })}
