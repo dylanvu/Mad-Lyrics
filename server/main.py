@@ -250,7 +250,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
 
                     print(replaced_lyrics)
 
-                    # TODO: need to call Suno
+                    # call Suno
                     # TODO: fix this
                     genre = "Funny Pop Song"
                     # genre = data["genre"]
