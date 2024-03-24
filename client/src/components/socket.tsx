@@ -66,7 +66,10 @@ export const WebsocketProvider = ({
         const socket = new WebSocket(`ws://localhost:8000/ws?client_id=${id}`);
         console.log(id);
 
-        socket.onopen = () => setIsReady(true);
+        socket.onopen = () => {
+            console.log("Connected")
+            setIsReady(true)
+        };
         socket.onclose = () => setIsReady(false);
         // socket.onmessage = (event) => setVal(event.data);
         socket.onmessage = (event) => {

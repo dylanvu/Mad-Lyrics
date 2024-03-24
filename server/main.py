@@ -157,6 +157,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                         await manager.broadcast(obj)
             
             elif event == "start":
+                print("Starting Mad Lyrics")
                 # call the api
                 # This should bring players from the lobby to the input screen
                 obj = {
@@ -235,6 +236,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                     # genre = data["genre"]
                     # create var that calls the function to generate a song using the Suno function "songGen" with the suno api key
                     # get_songs_custom is a function under suno with the lyrics and genre passed through the combined user prompted genre and gpt generated lyrics
+                    print("LYRICS: " + replaced_lyrics)
+                    print("GENRE: " + genre)
                     output = GenerateSong.get_songs_custom(replaced_lyrics, genre)
                     # returns a link from the "song url" element inside of the output item in dictionary, stored in link. The first element in the array
                     link = output['song_urls'][0]
