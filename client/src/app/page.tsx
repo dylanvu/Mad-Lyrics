@@ -74,8 +74,8 @@ export default function Home() {
     const [inputs, setInputs] = useState<string[][]>(inputMap);
     const [stage, setStage] = useState(0);
     const [isFilled, setIsFilled] = useState(false);
-
-    const [timer, setTimer] = useState(5);
+    const secPerRound = 15;
+    const [timer, setTimer] = useState(secPerRound);
 
     const handleInputChange = (
         props: MadlibLineProps,
@@ -121,7 +121,7 @@ export default function Home() {
     useEffect(() => {
         const decreaseTimer = () => {
             if (timer <= -1) {
-                setTimer(5);
+                setTimer(secPerRound);
                 setStage((prevStage) => prevStage + 1);
             } else {
                 setTimer((prevTimer) => {

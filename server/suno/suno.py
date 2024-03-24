@@ -84,9 +84,11 @@ class SongsGen:
     def _parse_lyrics(self, data: dict) -> Tuple[str, str]:
         song_name = data.get('title', '')
         mt = data.get('metadata')
-        if not mt or not song_name:
-            return '', ''
-        lyrics = re.sub(r"\[.*?\]", "", mt.get('prompt'))
+        lyrics = ''
+
+        if mt:
+            lyrics = re.sub(r"\[.*?\]", "", mt.get('prompt', ''))
+
         return song_name, lyrics
 
     def _fetch_songs_metadata(self, ids):
@@ -112,6 +114,8 @@ class SongsGen:
         for d in data:
             if s_url := d.get('audio_url'):
                 rs['song_urls'].append(s_url)
+        print("PRINTING DATA:")
+        print(data)
         song_name, lyric = self._parse_lyrics(data[0])
         rs['song_name'] = song_name
         rs['lyric'] = lyric

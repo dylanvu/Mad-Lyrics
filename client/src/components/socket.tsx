@@ -10,7 +10,7 @@ import {
 
 import { v4 } from "uuid";
 
-type validPhases = "lobby" | "input" | "waiting" | "song";
+type validPhases = "lobby" | "input" | "waiting" | "song" | "lobby_wait";
 interface ISocketContext {
     /**
      * if the socket is connected
@@ -32,6 +32,8 @@ interface ISocketContext {
     songData: string;
     mediaSource: MediaSource | null;
     sourceBuffer: SourceBuffer | null;
+    finishedSongData: { title: string; lyrics: string };
+    players: string[];
 }
 
 const startingPhase = "lobby";
@@ -46,6 +48,11 @@ export const WebsocketContext = createContext<ISocketContext>({
     songData: "",
     mediaSource: null,
     sourceBuffer: null,
+    finishedSongData: {
+        title: "",
+        lyrics: "",
+    },
+    players: [],
 });
 
 export const WebsocketProvider = ({
@@ -58,6 +65,11 @@ export const WebsocketProvider = ({
     const [client_id, setClientId] = useState("");
     const [currentPhase, setPhase] = useState<validPhases>(startingPhase);
     const [songData, setSongData] = useState("");
+    const [finishedSongData, setFinishedSongData] = useState({
+        title: "",
+        lyrics: "",
+    });
+    const [players, setPlayers] = useState<string[]>([]);
 
     const ws = useRef<WebSocket | null>(null);
 
@@ -130,6 +142,8 @@ export const WebsocketProvider = ({
                 setPhase(eventObject.data);
             } else if (eventObject.event === "lyrics") {
                 setSongData(eventObject.lyrics);
+            } else if (eventObject.event === "connection") {
+                setPlayers(eventObject.players);
             }
         };
 
@@ -173,6 +187,8 @@ export const WebsocketProvider = ({
         songData: songData,
         mediaSource: mediaSource,
         sourceBuffer: sourceBuffer.current,
+        finishedSongData: finishedSongData,
+        players: players,
     };
 
     return (
