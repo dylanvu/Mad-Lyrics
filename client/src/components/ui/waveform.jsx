@@ -70,7 +70,7 @@ function animateCircularWaveform(analyser, canvas, canvasCtx, dataArray) {
         0,
         0,
         canvas.width,
-        canvas.height
+        canvas.height,
     );
     gradient.addColorStop(0, "#f7941d"); // Start color (orange)
     gradient.addColorStop(1, "#0096ff"); // End color (blue)
@@ -108,14 +108,9 @@ const WaveForm = ({ analyzerData }) => {
     return (
         <canvas
             ref={canvasRef}
-            width={window.innerWidth}
-            height={window.innerHeight}
-            style={{
-                position: "absolute",
-                top: "0",
-                left: "0",
-                zIndex: "-10",
-            }}
+            width={600}
+            height={400}
+            className="flex-center"
         />
     );
 };

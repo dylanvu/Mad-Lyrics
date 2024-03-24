@@ -13,15 +13,15 @@ const WaveForm3D = ({ analyzerData }) => {
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(
-            75,
+            60,
             window.innerWidth / window.innerHeight,
             0.1,
-            1000
+            1000,
         );
         camera.position.set(0, 0, 100);
 
         const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setSize(600, 500);
         mountRef.current.appendChild(renderer.domElement);
 
         const controls = new OrbitControls(camera, renderer.domElement);
@@ -68,14 +68,14 @@ const WaveForm3D = ({ analyzerData }) => {
                 const geometry = new THREE.ConeGeometry(
                     spikeRadius,
                     0.2 * (i + 1),
-                    32
+                    32,
                 );
                 const material = new THREE.MeshPhongMaterial({
                     color: new THREE.Color(
-                        `hsl(${(spikeIndex * 360) / numSpikesRing}, 100%, 70%)`
+                        `hsl(${(spikeIndex * 360) / numSpikesRing}, 100%, 70%)`,
                     ),
                     emissive: new THREE.Color(
-                        `hsl(${(spikeIndex * 360) / numSpikesRing}, 100%, 50%)`
+                        `hsl(${(spikeIndex * 360) / numSpikesRing}, 100%, 50%)`,
                     ),
                 });
                 const spike = new THREE.Mesh(geometry, material);
@@ -154,7 +154,7 @@ const WaveForm3D = ({ analyzerData }) => {
         };
     }, [analyzerData]);
 
-    return <div ref={mountRef} style={{ width: "100%", height: "100%" }}></div>;
+    return <div ref={mountRef} style={{ width: "100%", height: "100%" }} />;
 };
 
 export default WaveForm3D;
