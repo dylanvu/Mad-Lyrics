@@ -393,6 +393,8 @@ async def get_lyrics():
     topic = get_random_non_empty_entry(manager.player_topics)
     if topic is None:
         topic = ""
+    else:
+        topic = "about " + topic
     # call chatgpt
     prompt = [
         {"role": "system", "content": "You are a intelligent assistant."},
