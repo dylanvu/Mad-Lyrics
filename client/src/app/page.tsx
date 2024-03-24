@@ -121,7 +121,7 @@ export default function Home() {
     useEffect(() => {
         const decreaseTimer = () => {
             if (timer <= -1) {
-                setTimer(5);
+                setTimer(1);
                 setStage((prevStage) => prevStage + 1);
             } else {
                 setTimer((prevTimer) => {

@@ -10,7 +10,7 @@ import {
 
 import { v4 } from "uuid";
 
-type validPhases = "lobby" | "input" | "waiting" | "song";
+type validPhases = "lobby" | "input" | "waiting" | "song" | "lobby_wait";
 interface ISocketContext {
     /**
      * if the socket is connected

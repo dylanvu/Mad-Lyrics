@@ -179,13 +179,23 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
             elif event == "start":
                 print("Starting Mad Lyrics")
                 # call the api
-                # This should bring players from the lobby to the input screen
+                # make everyone wait
+                obj = {
+                    "event": "phase_change",
+                    "data": "lobby_wait"
+                }
+                await manager.broadcast(obj)
+
+                # get prompt from GPT
+                lyrics = await get_lyrics()
+
+                # now move all players
                 obj = {
                     "event": "phase_change",
                     "data": "input"
                 }
-                lyrics = await get_lyrics()
                 await manager.broadcast(lyrics)
+                # This should bring players from the lobby to the input screen
                 await manager.broadcast(obj)
             elif event == "finished":
                 # parse out the event data to get which player finished
@@ -334,43 +344,43 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
 @app.get("/lyricstemplate")
 async def get_lyrics():
     # call chatgpt
-#     prompt = [
-#         {"role": "system", "content": "You are a intelligent assistant."},
+    prompt = [
+        {"role": "system", "content": "You are a intelligent assistant."},
 
-#         {"role": "user", "content": """
-# You will generate a mad-libs puzzle and output the mad-libs in a JSON schema. Here is an example of the JSON schema I want:
-# [
-#   {
-#     "part": "Verse",
-#     "lyrics": string[]
-#   },
-# ]
-# Create lyrics following the same JSON schema. The lyrics themselves should be quite different from what I put, as well as the mad libs. My example only applies to the JSON format. The mad libs should be annotated by the proper type of speech ie. {noun}. The valid parts of speech are: noun, adjective, verb, and adverb. 
-
-# Make four verses: Verse, Chorus, Bridge,  and Outro. Each verses will have 4 lines.
-# Never have two mad-libs next to each other in the same line. For example, {adjective} {noun} is invalid.
-
-# Have only 1 mad lib per line. There must be 1 mad-lib per line.
-# """}
-#     ]
-#     chat = openai.chat.completions.create( 
-#             model="gpt-4-turbo-preview", messages=prompt
-#         )
-    
-#     reply = chat.choices[0].message.content 
-    reply = """
+        {"role": "user", "content": """
+You will generate a mad-libs puzzle and output the mad-libs in a JSON schema. Here is an example of the JSON schema I want:
 [
   {
-    "part": "Outro",
-    "lyrics": [
-      "Here's to the {noun}, the light, and the {noun},",
-      "On this path, we're forever {adjective}.",
-      "From dawn to dusk, under the sky's {noun},",
-      "Together, into the unknown we {verb}."
-    ]
-  }
+    "part": "Verse",
+    "lyrics": string[]
+  },
 ]
-"""
+Create lyrics following the same JSON schema. The lyrics themselves should be quite different from what I put, as well as the mad libs. My example only applies to the JSON format. The mad libs should be annotated by the proper type of speech ie. {noun}. The valid parts of speech are: noun, adjective, verb, and adverb. 
+
+Make four verses: Verse, Chorus, Bridge,  and Outro. Each verses will have 4 lines.
+Never have two mad-libs next to each other in the same line. For example, {adjective} {noun} is invalid.
+
+Have only 1 mad lib per line. There must be 1 mad-lib per line.
+"""}
+    ]
+    chat = openai.chat.completions.create( 
+            model="gpt-4-turbo-preview", messages=prompt
+        )
+    
+    reply = chat.choices[0].message.content 
+#     reply = """
+# [
+#   {
+#     "part": "Outro",
+#     "lyrics": [
+#       "Here's to the {noun}, the light, and the {noun},",
+#       "On this path, we're forever {adjective}.",
+#       "From dawn to dusk, under the sky's {noun},",
+#       "Together, into the unknown we {verb}."
+#     ]
+#   }
+# ]
+# """
     reply = reply.replace("```json", "")
     reply = reply.replace("```", "")
     reply = reply.strip()
