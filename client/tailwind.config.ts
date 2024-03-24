@@ -58,6 +58,7 @@ const config = {
                     purple: "#7467FF",
                     black: "#0C0D10",
                     gray: "#2F3341",
+                    card: "#191B21",
                 },
             },
             borderRadius: {

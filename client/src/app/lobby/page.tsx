@@ -48,7 +48,7 @@ export default function Lobby() {
                     </div>
 
                     <div className="space-y-4 mb-auto">
-                        <div className="bg-[#20232C] border-4 border-jas-gray hover:border-jas-purple text-white p-4 py-1 rounded-2xl flex-between">
+                        <div className="bg-jas-card border-4 border-jas-gray hover:border-jas-purple text-white p-4 py-1 rounded-2xl flex-between">
                             <img
                                 src="./images/cat.svg"
                                 alt="cat"
@@ -56,7 +56,7 @@ export default function Lobby() {
                             />
                             <p className="font-bold text-3xl">SuperEpicGamer</p>
                         </div>
-                        <div className="bg-[#20232C] border-4 border-jas-gray hover:border-jas-purple text-white p-4 py-1 rounded-2xl flex-between">
+                        <div className="bg-jas-card border-4 border-jas-gray hover:border-jas-purple text-white p-4 py-1 rounded-2xl flex-between">
                             <img
                                 src="./images/bird.svg"
                                 alt="cat"
@@ -64,7 +64,7 @@ export default function Lobby() {
                             />
                             <p className="font-bold text-3xl">SuperEpicGamer</p>
                         </div>
-                        <div className="bg-[#20232C] border-4 border-jas-gray hover:border-jas-purple text-white p-4 py-1 rounded-2xl flex-between">
+                        <div className="bg-jas-card border-4 border-jas-gray hover:border-jas-purple text-white p-4 py-1 rounded-2xl flex-between">
                             <img
                                 src="./images/mouse.svg"
                                 alt="cat"
@@ -107,7 +107,7 @@ export default function Lobby() {
                     />
 
                     <div className="flex space-x-4">
-                        <div className="bg-[#20232C] border-4 border-jas-gray hover:border-jas-purple text-white p-4 rounded-2xl flex-between space-x-2">
+                        <div className="bg-jas-card border-4 border-jas-gray hover:border-jas-purple text-white p-4 rounded-2xl flex-between space-x-2">
                             <div className="w-12 h-12 flex-center rounded-2xl bg-jas-gray">
                                 <User fill="white" className="w-8 h-8" />
                             </div>
