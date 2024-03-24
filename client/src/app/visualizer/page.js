@@ -3,8 +3,10 @@ import { useRef, useState, useEffect } from "react";
 import WaveForm from "../../components/ui/waveform";
 import Waveform3D from "../../components/ui/waveform3d";
 import Ballform3D from "../../components/ui/ballform";
+import { cn } from "@/lib/utils";
+import { PlayCircle } from "lucide-react";
 
-export default function App() {
+export default function Visualizer() {
     const [analyzerData, setAnalyzerData] = useState(null);
     const [playing, setPlaying] = useState(false);
     const audioElmRef = useRef(null);
@@ -58,21 +60,18 @@ export default function App() {
     };
 
     return (
-        <div className="App">
-            <h1>Audio Visualizer</h1>
-            {analyzerData && <Waveform3D analyzerData={analyzerData} />}
-            <div
-                style={{
-                    height: 80,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "space-around",
-                }}
-            >
-                <button onClick={audioAnalyzer}>Start Visualization</button>
-                <audio controls ref={audioElmRef} style={{ marginTop: 20 }} />
-            </div>
+        <div className="flex-center flex-col">
+            {analyzerData ? (
+                <Waveform3D analyzerData={analyzerData} />
+            ) : (
+                <button
+                    onClick={audioAnalyzer}
+                    className="border-jas-stroke flex-center h-[500px] w-[600px] border"
+                >
+                    <PlayCircle className="h-20 w-20" />
+                </button>
+            )}
+            <audio controls ref={audioElmRef} style={{ marginTop: 20 }} />
         </div>
     );
 }

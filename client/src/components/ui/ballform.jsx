@@ -18,7 +18,7 @@ const BallForm3D = ({ analyzerData }) => {
             75,
             window.innerWidth / window.innerHeight,
             0.1,
-            1000
+            1000,
         );
         const renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
