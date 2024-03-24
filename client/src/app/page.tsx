@@ -108,6 +108,7 @@ export default function Home() {
                 setFeedback("done");
             });
     }, []);
+
     const lyrics = JSON.parse(songData) as LyricPart[];
 
     const ws = useContext(WebsocketContext);
