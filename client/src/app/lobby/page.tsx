@@ -6,7 +6,7 @@ import { useEffect, useContext, useState } from "react";
 import { WebsocketContext } from "@/components/socket";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { Check, Dices, User, X } from "lucide-react";
+import { Check, Dices, User, Loader, X } from "lucide-react";
 
 function uuidToNumber(uuid: string) {
     let hash = 0;
@@ -26,6 +26,8 @@ export default function Lobby() {
         "supergirlygmaer",
     ]);
 
+    const [loading, setLoading] = useState(false);
+
     const handleStart = () => {
         // send start event to all clients
         const jsonString: string = JSON.stringify({
@@ -43,6 +45,8 @@ export default function Lobby() {
     useEffect(() => {
         if (ws.phase === "input") {
             router.push("/"); // FIXME: When we swap URLs, make sure to update this too
+        } else if (ws.phase === "lobby_wait") {
+            setLoading(true);
         }
     }, [router, ws.phase]);
 
