@@ -55,9 +55,10 @@ export const WebsocketProvider = ({
     const ws = useRef<WebSocket | null>(null);
 
     useEffect(() => {
-        const id = crypto.randomUUID();
-        setClientId(v4());
+        const id = v4();
+        setClientId(id);
         const socket = new WebSocket(`ws://localhost:8000/ws?client_id=${id}`);
+        console.log(id);
 
         socket.onopen = () => setIsReady(true);
         socket.onclose = () => setIsReady(false);
