@@ -76,6 +76,7 @@ async def create_name(name:Name):
 
 # websocket
 @app.websocket("/ws")
+# default state of client is none
 async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None):
     if client_id is None:
         client_id = websocket.query_params.get("client_id")
@@ -84,30 +85,33 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
         await websocket.close(code=4001)
         return
 
-    await manager.connect(websocket, client_id)
-
-        
+    await manager.connect(websocket, client_id)      
     try:
         while True:
             data = await websocket.receive_json()
             event = data["event"]
             if event == "generate":
-                print("generate event")
                 lyrics = data["lyrics"]
                 genre = data["genre"]
+                # create var that calls the function to generate a song using the Suno function "songGen" with the suno api key
+                # get_songs_custom is a function under suno with the lyrics and genre passed through the combined user prompted genre and gpt generated lyrics
                 output = GenerateSong.get_songs_custom(lyrics, genre)
+                # returns a link from the "song url" element inside of the output item in dictionary, stored in link. The first element in the array
                 link = output['song_urls'][0]
+                # gets the mp3 associated with each link and sets streaming in websocket to true, meaning that data is sent in chunks
                 audio = GenerateSong.get_mp3(link, stream=True)
                 for chunk in audio:
                     if chunk:
                         # translates binary to base64 string
                         b64 = base64.b64encode(chunk)
-                        # translates into string
+                        # decodes the b.64 binary obj into a string
                         utf = b64.decode('utf-8')
+                        # creates a dict obj that stores the event as an audio chunk and sets the audio data to utf format
                         obj = {
                             "event": "audio",
                             "audio_data": utf
                         }
+                        # waits for broadcasting to run
                         await manager.broadcast(obj)
 
             elif event == "lyrics":
@@ -117,6 +121,21 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                 #     "event": "lyrics",
                 #     "data": lyrics
                 # })
+            elif event == "sample_song":
+                path_to_song = './output/1.mp3'
+                with open(song_path, 'rb') as mp3_file:
+                    while True:
+                        # reading data in chunks of 4kb
+                        chunk = mp3_file.read(4096)
+                        if not chunk:
+                            break
+                        b64 = base64.b64encode(chunk)
+                        utf = b64.decode('utf-8')
+                        obj = {
+                            "event": "audio",
+                            "audio_data": utf
+                        }
+                        await manager.broadcast(obj)
             
     except WebSocketDisconnect:
         print("Disconnecting...")
