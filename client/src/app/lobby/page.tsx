@@ -72,6 +72,17 @@ export default function Lobby() {
         );
     }
 
+    function handleTopicChange(newVal: string) {
+        // send to backend to update
+        ws.send(
+            JSON.stringify({
+                event: "topic",
+                genre: newVal,
+                id: ws.id,
+            }),
+        );
+    }
+
     return (
         <main className="flex-between h-screen min-h-screen bg-[url('/images/lobbyBackground.svg')] p-16">
             {/* <div className="main-div">lobby</div>
@@ -240,6 +251,9 @@ export default function Lobby() {
                                         id="music-topic"
                                         name="music-topic"
                                         placeholder="funny bunnies"
+                                        onChange={(e) =>
+                                            handleTopicChange(e.target.value)
+                                        }
                                     />
                                 </form>
                                 <Button

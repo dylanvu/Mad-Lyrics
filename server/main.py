@@ -55,6 +55,7 @@ class ConnectionManager:
         self.order_players_by_arrival: List[str] = []
         self.player_genres: Dict[str, List[List[str]]] = []
         self.player_emotions: Dict[str, List[List[str]]] = []
+        self.player_topics: Dict[str, List[List[str]]] = []
 
 
     # establish connection btwn a client and ws. waits for ws to start and adds accepted client to active connections
@@ -66,6 +67,8 @@ class ConnectionManager:
         self.order_players_by_arrival.append(client_id)
         self.player_genres[client_id] = "" # literally spaghetti code
         self.player_emotions[client_id] = "" # literally spaghetti code
+        self.player_topics[client_id] = "" # literally spaghetti code
+
         print(self.active_connections)
         # send the new connections
         obj = {
@@ -81,6 +84,7 @@ class ConnectionManager:
         del self.player_inputs[client_id]
         del self.player_genres[client_id]
         del self.player_emotions[client_id]
+        del self.player_topics[client_id]
 
         print(self.active_connections)
         # remove player order
@@ -372,6 +376,12 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                 id = data["id"]
                 emotion = data["emotion"]
                 manager.player_emotions[id] = emotion
+
+            elif event == "topic":
+                # update emotion in backend
+                id = data["id"]
+                topic = data["topic"]
+                manager.player_topics[id] = topic
                 
     except WebSocketDisconnect:
         print("Disconnecting...")
@@ -380,6 +390,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
 # chatgpt 
 @app.get("/lyricstemplate")
 async def get_lyrics():
+    topic = get_random_non_empty_entry(manager.player_topics)
+    if topic is None:
+        topic = ""
     # call chatgpt
     prompt = [
         {"role": "system", "content": "You are a intelligent assistant."},
@@ -424,7 +437,7 @@ You will generate a mad-libs puzzle and output the mad-libs in a JSON schema. He
     ]
   }
 ]
-Create lyrics following the same JSON schema. The lyrics themselves should be quite different from what I put, as well as the mad libs. My example only applies to the JSON format. The mad libs should be annotated by the proper type of speech ie. {noun}. The valid parts of speech are: noun, adjective, verb, and adverb. 
+Create lyrics """ + topic + """ following the same JSON schema. The lyrics themselves should be quite different from what I put, as well as the mad libs. My example only applies to the JSON format. The mad libs should be annotated by the proper type of speech ie. {noun}. The valid parts of speech are: noun, adjective, verb, and adverb. 
 
 Make four verses: Verse, Chorus, Bridge,  and Outro. Each verses will have 4 lines.
 Never have two mad-libs next to each other in the same line. For example, {adjective} {noun} is invalid.
