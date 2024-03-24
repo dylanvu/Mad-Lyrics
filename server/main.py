@@ -351,9 +351,14 @@ async def get_lyrics():
 You will generate a mad-libs puzzle and output the mad-libs in a JSON schema. Here is an example of the JSON schema I want:
 [
   {
-    "part": "Verse",
-    "lyrics": string[]
-  },
+    "part": "Outro",
+    "lyrics": [
+      "Here's to the {noun}, the light, and the {noun},",
+      "On this path, we're forever {adjective}.",
+      "From dawn to dusk, under the sky's {noun},",
+      "Together, into the unknown we {verb}."
+    ]
+  }
 ]
 Create lyrics following the same JSON schema. The lyrics themselves should be quite different from what I put, as well as the mad libs. My example only applies to the JSON format. The mad libs should be annotated by the proper type of speech ie. {noun}. The valid parts of speech are: noun, adjective, verb, and adverb. 
 
