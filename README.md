@@ -21,7 +21,7 @@
   <br>
 </p>
 
-### 🥇 WebJam 2023 First Place Winner
+### 🏅 Uncommon Hacks 2024 Best Programmatic Art
 
 <br>
 
