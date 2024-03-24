@@ -28,6 +28,7 @@ interface ISocketContext {
     send: (data: string | ArrayBufferLike | Blob | ArrayBufferView) => void;
     setQueue: Dispatch<SetStateAction<string[]>>;
     phase: validPhases;
+    id: string;
 }
 
 const startingPhase = "lobby";
@@ -38,6 +39,7 @@ export const WebsocketContext = createContext<ISocketContext>({
     send: () => {},
     setQueue: () => {},
     phase: startingPhase,
+    id: "",
 });
 
 export const WebsocketProvider = ({
@@ -99,6 +101,7 @@ export const WebsocketProvider = ({
         //       },
         setQueue: setValQueue,
         phase: currentPhase,
+        id: client_id,
     };
 
     return (
