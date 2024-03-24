@@ -29,7 +29,11 @@ app.add_middleware(
 )
 
 SUNO_COOKIE = os.getenv("SUNO_COOKIE")
-GenerateSong = SongsGen(SUNO_COOKIE)
+try:
+    GenerateSong = SongsGen(SUNO_COOKIE)
+except Exception as e:
+    print(e)
+
 
 openai.api_key = os.getenv("OPEN_AI_API_KEY")
 
