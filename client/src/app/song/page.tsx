@@ -147,7 +147,8 @@ const Page = () => {
                             WebkitTextStrokeWidth: 2,
                         }}
                     >
-                        Lyrics &nbsp;🎶
+                        Lyrics &nbsp;🎶 {ws.finishedSongData.genre}{" "}
+                        {ws.finishedSongData.topic}
                     </h2>
 
                     <div className="flex flex-col text-2xl font-medium">
@@ -163,7 +164,7 @@ const Page = () => {
                 </div>
             </div>
 
-            {loading && <LoadingPage />}
+            {/* {loading && <LoadingPage />} */}
         </div>
     );
 };
