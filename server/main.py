@@ -1,7 +1,11 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
+from typing import Dict, List
 import openai
 import base64
+import json
+import re
+import random
 
 from suno import SongsGen
 from dotenv import load_dotenv
@@ -31,6 +35,8 @@ app.add_middleware(
 SUNO_COOKIE = os.getenv("SUNO_COOKIE")
 GenerateSong = SongsGen(SUNO_COOKIE)
 
+
+
 openai.api_key = os.getenv("OPEN_AI_API_KEY")
 
 class Name(BaseModel):
@@ -41,13 +47,24 @@ class ConnectionManager:
     # initializes ws and adds to active connections inside of a dictionary
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
+        self.ready_players: Dict[str, bool] = {}
+        self.player_inputs: Dict[str, List[List[str]]] = {}
+        self.currentLyrics: str = ""
+        self.num_inputs = 0
+
     # establish connection btwn a client and ws. waits for ws to start and adds accepted client to active connections
     async def connect(self, websocket: WebSocket, client_id: str):
         await websocket.accept()
         self.active_connections[client_id] = websocket
+        self.ready_players[client_id] = False
+        self.player_inputs[client_id] = []
+        print(self.active_connections)
     # disconnects client from ws
     def disconnect(self, client_id: str):
         del self.active_connections[client_id]
+        del self.ready_players[client_id]
+        del self.player_inputs[client_id]
+        print(self.active_connections)
     #  converts music into binary which it then sends as bytes
     async def send_personal_message(self, data: dict, websocket: WebSocket):
         await websocket.send_json(data)
@@ -84,7 +101,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
     if client_id is None:
         await websocket.close(code=4001)
         return
-
+    # save this client into server memory
     await manager.connect(websocket, client_id)      
     try:
         while True:
@@ -122,12 +139,13 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                 #     "data": lyrics
                 # })
             elif event == "sample_song":
-                path_to_song = './output/1.mp3'
-                # rb is reading the file in bits and bytes
+                print("Getting sample song manually")
+                path_to_song = './output/2 .mp3'
                 with open(path_to_song, 'rb') as mp3_file:
                     while True:
                         # reading data in chunks of 4kb
-                        chunk = mp3_file.read(4096)
+                        chunk = mp3_file.read(512)
+                        print("chunk", flush=True)
                         if not chunk:
                             break
                         #translates bits and bytes into text
@@ -140,6 +158,127 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                         }
                         await manager.broadcast(obj)
             
+            elif event == "start":
+                print("Starting Mad Lyrics")
+                # call the api
+                # This should bring players from the lobby to the input screen
+                obj = {
+                    "event": "phase_change",
+                    "data": "input"
+                }
+                lyrics = await get_lyrics()
+                await manager.broadcast(lyrics)
+                await manager.broadcast(obj)
+            elif event == "finished":
+                # parse out the event data to get which player finished
+                # expect: {"event": "finished", "id": string, "libs": string[][]}
+                id = data["id"]
+                libs = data["libs"]
+                manager.ready_players[id] = True
+                manager.player_inputs[id] = libs
+                # if all players are ready, move them to the waiting screen
+                all_ready = all(value for value in manager.ready_players.values())
+                if all_ready:
+                    # bring all players to the moving screen
+                    print("READY TO GENERATE")
+                    print(manager.player_inputs)
+                    # randomly select from inputs
+                    # flatten each player's input for ease of parsing
+                    all_flattened_inputs = []
+                    for player in manager.player_inputs:
+                        flattened_inputs = [item for sublist in manager.player_inputs[player] for item in sublist]
+                        all_flattened_inputs.append(flattened_inputs)
+                    # choose random choices
+                    # iterate through each input
+                    print(manager.num_inputs)
+                    print(all_flattened_inputs)
+                    combined_list = []
+                    for inputIndex in range(0, manager.num_inputs):
+                        num_players = len(manager.player_inputs.keys())
+                        # check if there is any choice that has no inputs
+                        # Initialize a list to store the results for each index
+                        curr_list = []
+                        # Loop through each index from 0 to 16
+                        for i in range(0, num_players):
+                            # Check if any player has a non-empty string at the current index
+                            if len(all_flattened_inputs[i][inputIndex]) > 0:
+                                curr_list.append(all_flattened_inputs[i][inputIndex])
+                        if(len(curr_list) > 0):
+                            # choose a random one
+                            randomInt = generate_random_number(len(curr_list))
+                            selectedPlayerInputs = curr_list[randomInt]
+                            combined_list.append(selectedPlayerInputs)
+                        else:
+                            # TODO: replace this
+                            combined_list.append('dog')
+                
+                    # replace prompt with end_inputs
+                    print(combined_list)
+                    pattern = r'\{.*?\}'
+                    # turn the json structure into just a plain string
+                    output = ""
+                    # print(manager.currentLyrics)
+                    for section in json.loads(manager.currentLyrics):
+                        output += f"{section['part']}:\n"
+                        output += "\n".join(section["lyrics"]) + "\n\n"
+                    print(output)
+                    replaced_lyrics = output
+                    current_input_index = 0
+                    # While there are matches and the current_input_index is less than the length of combined_list
+                    while re.search(pattern, replaced_lyrics) and current_input_index < len(combined_list):
+                        # Replace the first instance
+                        replaced_lyrics = re.sub(pattern, combined_list[current_input_index], replaced_lyrics, count=1)
+                        current_input_index += 1
+
+                    print(replaced_lyrics)
+
+                    # TODO: need to call Suno
+                    # TODO: fix this
+                    genre = "Funny Pop Song"
+                    # genre = data["genre"]
+                    # create var that calls the function to generate a song using the Suno function "songGen" with the suno api key
+                    # get_songs_custom is a function under suno with the lyrics and genre passed through the combined user prompted genre and gpt generated lyrics
+                    print("LYRICS: " + replaced_lyrics)
+                    print("GENRE: " + genre)
+                    output = GenerateSong.get_songs_custom(replaced_lyrics, genre)
+                    # returns a link from the "song url" element inside of the output item in dictionary, stored in link. The first element in the array
+                    link = output['song_urls'][0]
+                    # gets the mp3 associated with each link and sets streaming in websocket to true, meaning that data is sent in chunks
+                    audio = GenerateSong.get_mp3(link, stream=True)
+                    for chunk in audio:
+                        if chunk:
+                            # translates binary to base64 string
+                            b64 = base64.b64encode(chunk)
+                            # decodes the b.64 binary obj into a string
+                            utf = b64.decode('utf-8')
+                            # creates a dict obj that stores the event as an audio chunk and sets the audio data to utf format
+                            obj = {
+                                "event": "audio",
+                                "audio_data": utf
+                            }
+                            # waits for broadcasting to run
+                            await manager.broadcast(obj)
+                    
+                    
+
+                    # # TODO: Remove sample song
+                    # print("Getting sample song")
+                    # path_to_song = './output/2 .mp3'
+                    # with open(path_to_song, 'rb') as mp3_file:
+                    #     while True:
+                    #         # reading data in chunks of 4kb
+                    #         chunk = mp3_file.read(48000)
+                    #         print("chunk", flush=True)
+                    #         if not chunk:
+                    #             break
+                    #         b64 = base64.b64encode(chunk)
+                    #         utf = b64.decode('utf-8')
+                    #         obj = {
+                    #             "event": "audio",
+                    #             "audio_data": utf
+                    #         }
+                    #         await manager.broadcast(obj)
+
     except WebSocketDisconnect:
         print("Disconnecting...")
         manager.disconnect(client_id)
@@ -148,73 +287,90 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
 @app.get("/lyricstemplate")
 async def get_lyrics():
     # call chatgpt
-    prompt = [
-        {"role": "system", "content": "You are a intelligent assistant."},
+#     prompt = [
+#         {"role": "system", "content": "You are a intelligent assistant."},
 
-        {"role": "user", "content": """
-You will generate a mad-libs puzzle and output the mad-libs in a JSON schema. Here is an example of the JSON schema I want:
-[
-  {
-    "part": "Verse",
-    "lyrics": string[]
-  },
-]
-Create lyrics following the same JSON schema. The lyrics themselves should be quite different from what I put, as well as the mad libs. My example only applies to the JSON format. The mad libs should be annotated by the proper type of speech ie. {noun}. The valid parts of speech are: noun, adjective, verb, and adverb. 
-
-Make four verses: Verse, Chorus, Bridge,  and Outro. Each verses will have 4 lines.
-Never have two mad-libs next to each other in the same line. For example, {adjective} {noun} is invalid.
-
-Have only 1 mad lib per line. There must be 1 mad-lib per line.
-"""}
-    ]
-    chat = openai.chat.completions.create( 
-            model="gpt-4-turbo-preview", messages=prompt 
-        )
-    
-    reply = chat.choices[0].message.content 
-#     reply = """
+#         {"role": "user", "content": """
+# You will generate a mad-libs puzzle and output the mad-libs in a JSON schema. Here is an example of the JSON schema I want:
 # [
 #   {
 #     "part": "Verse",
-#     "lyrics": [
-#       "The wind in the night, it whispers so {adjective},",
-#       "Carrying tales from the {noun} so {adjective}.",
-#       "My {noun} in my hand, ancient and {adjective},",
-#       "Across the endless fields, our shadows {verb}."
-#     ]
+#     "lyrics": string[]
 #   },
-#   {
-#     "part": "Chorus",
-#     "lyrics": [
-#       "With every step, I grow {adjective},",
-#       "In a realm where {noun} softly {verb}.",
-#       "But by your {noun}, I sail my {noun},",
-#       "And in your voice, the {noun} I've long {verb}."
-#     ]
-#   },
-#   {
-#     "part": "Bridge",
-#     "lyrics": [
-#       "Under the gaze of the {noun}, we {verb},",
-#       "To the rhythm that makes our hearts {verb},",
-#       "Side by side, we {verb} and {verb},",
-#       "In this {noun} dream, where hope brightly {verb}."
-#     ]
-#   },
-#   {
-#     "part": "Outro",
-#     "lyrics": [
-#       "Here's to the {noun}, the light, and the {noun},",
-#       "On this path, we're forever {adjective}.",
-#       "From dawn to dusk, under the sky's {noun},",
-#       "Together, into the unknown we {verb}."
-#     ]
-#   }
 # ]
-# """
+# Create lyrics following the same JSON schema. The lyrics themselves should be quite different from what I put, as well as the mad libs. My example only applies to the JSON format. The mad libs should be annotated by the proper type of speech ie. {noun}. The valid parts of speech are: noun, adjective, verb, and adverb. 
+
+# Make four verses: Verse, Chorus, Bridge,  and Outro. Each verses will have 4 lines.
+# Never have two mad-libs next to each other in the same line. For example, {adjective} {noun} is invalid.
+
+# Have only 1 mad lib per line. There must be 1 mad-lib per line.
+# """}
+#     ]
+#     chat = openai.chat.completions.create( 
+#             model="gpt-4-turbo-preview", messages=prompt
+#         )
+    
+#     reply = chat.choices[0].message.content 
+    reply = """
+[
+  {
+    "part": "Verse",
+    "lyrics": [
+      "The wind in the night, it whispers so {adjective},",
+      "Carrying tales from the {noun} so {adjective}.",
+      "My {noun} in my hand, ancient and {adjective},",
+      "Across the endless fields, our shadows {verb}."
+    ]
+  },
+  {
+    "part": "Chorus",
+    "lyrics": [
+      "With every step, I grow {adjective},",
+      "In a realm where {noun} softly {verb}.",
+      "But by your {noun}, I sail my {noun},",
+      "And in your voice, the {noun} I've long {verb}."
+    ]
+  },
+  {
+    "part": "Bridge",
+    "lyrics": [
+      "Under the gaze of the {noun}, we {verb},",
+      "To the rhythm that makes our hearts {verb},",
+      "Side by side, we {verb} and {verb},",
+      "In this {noun} dream, where hope brightly {verb}."
+    ]
+  },
+  {
+    "part": "Outro",
+    "lyrics": [
+      "Here's to the {noun}, the light, and the {noun},",
+      "On this path, we're forever {adjective}.",
+      "From dawn to dusk, under the sky's {noun},",
+      "Together, into the unknown we {verb}."
+    ]
+  }
+]
+"""
     reply = reply.replace("```json", "")
     reply = reply.replace("```", "")
     reply = reply.strip()
     print(f"ChatGPT: {reply}") 
-    return {"lyrics": reply}
+    manager.currentLyrics = reply
+    # parse out information about the response, such as how many inputs there are
+    lyrics = json.loads(reply)
+    pattern = r'\{.*?\}'
+    num_inputs = 0
+    for part in lyrics:
+        for line in part["lyrics"]:
+            matches = re.findall(pattern, line)
+            if (matches):
+                num_inputs += len(matches)
+    manager.num_inputs = num_inputs
 
+    return {
+        "event": "lyrics",
+        "lyrics": reply
+        }
+
+def generate_random_number(upper_limit):
+    return random.randrange(0, upper_limit)
