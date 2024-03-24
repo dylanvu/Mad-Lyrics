@@ -78,7 +78,7 @@ export default function Lobby() {
             <Button onClick={handleStart}>Start Game</Button>
             <p>{ws.ready ? "Connected!" : "Not connected )="}</p> */}
             {loading ? (
-                <div className="flex-center my-auto flex-col space-y-4 text-white">
+                <div className="flex-center mx-auto my-auto flex-col space-y-4 text-white">
                     <Loader className="h-24 w-24 animate-spin transition duration-3000" />
                     <span className="text-3xl font-semibold">
                         Generating your{" "}
