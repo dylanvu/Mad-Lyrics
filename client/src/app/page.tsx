@@ -69,7 +69,7 @@ interface MadlibLineProps {
 interface MadlibInputProps extends MadlibLineProps {
     updateValue: (
         props: MadlibLineProps,
-        e: ChangeEvent<HTMLInputElement>
+        e: ChangeEvent<HTMLInputElement>,
     ) => void;
 }
 
@@ -83,7 +83,7 @@ const InputComponent = (props: MadlibInputProps) => {
             onChange={(e) => {
                 updateValue(
                     { verseIndex, inputIndex, numVerses, lyricIndex },
-                    e
+                    e,
                 );
             }}
         />
@@ -146,7 +146,7 @@ export default function Home() {
 
     const handleInputChange = (
         props: MadlibLineProps,
-        e: ChangeEvent<HTMLInputElement>
+        e: ChangeEvent<HTMLInputElement>,
     ) => {
         const { verseIndex, inputIndex, numVerses, lyricIndex } = props;
 
@@ -264,13 +264,13 @@ export default function Home() {
                                                               }
                                                           />,
                                                       ]
-                                                    : [component]
+                                                    : [component],
                                         );
 
                                     // join the array
                                     lyricsComponents =
                                         lyricsComponents.concat(
-                                            inputAndStaticArray
+                                            inputAndStaticArray,
                                         );
                                 } else {
                                     // return just the text
@@ -299,14 +299,14 @@ export default function Home() {
                                                 <span key={index}>
                                                     {component}
                                                 </span>
-                                            )
+                                            ),
                                         )}
                                     </div>
 
                                     <Button
                                         onClick={() => {
                                             setStage(
-                                                (prevStage) => prevStage + 1
+                                                (prevStage) => prevStage + 1,
                                             );
                                             setTimer(15);
                                         }}
@@ -319,7 +319,7 @@ export default function Home() {
                                         <p
                                             className={cn(
                                                 "text-3xl",
-                                                timer <= 5 && "text-[#FF0000]"
+                                                timer <= 5 && "text-[#FF0000]",
                                             )}
                                         >
                                             {timer}
