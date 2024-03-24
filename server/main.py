@@ -261,7 +261,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
 
                     # call Suno
                     # TODO: fix this
-                    genre = "Funny Pop Song"
+                    genre = "Upbeat Pop"
                     # genre = data["genre"]
                     # create var that calls the function to generate a song using the Suno function "songGen" with the suno api key
                     # get_songs_custom is a function under suno with the lyrics and genre passed through the combined user prompted genre and gpt generated lyrics
