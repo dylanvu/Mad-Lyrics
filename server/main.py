@@ -46,16 +46,20 @@ class ConnectionManager:
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
         self.ready_players: Dict[str, bool] = {}
+        self.player_inputs: Dict[str, List[List[str]]] = {}
+
     # establish connection btwn a client and ws. waits for ws to start and adds accepted client to active connections
     async def connect(self, websocket: WebSocket, client_id: str):
         await websocket.accept()
         self.active_connections[client_id] = websocket
         self.ready_players[client_id] = False
+        self.player_inputs[client_id] = []
         print(self.active_connections)
     # disconnects client from ws
     def disconnect(self, client_id: str):
         del self.active_connections[client_id]
         del self.ready_players[client_id]
+        del self.player_inputs[client_id]
         print(self.active_connections)
     #  converts music into binary which it then sends as bytes
     async def send_personal_message(self, data: dict, websocket: WebSocket):
@@ -194,13 +198,16 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                 # parse out the event data to get which player finished
                 # expect: {"event": "finished", "id": string, "libs": string[][]}
                 id = data["id"]
+                libs = data["libs"]
                 manager.ready_players[id] = True
-                print(manager.ready_players)
+                manager.player_inputs[id] = libs
                 # if all players are ready, move them to the waiting screen
                 all_ready = all(value for value in manager.ready_players.values())
                 if all_ready:
                     # bring all players to the moving screen
                     print("READY TO GENERATE")
+                    print(manager.player_inputs)
+                    # TODO: need to randomly select from inputs
                     # obj = {
                     # "event": "phase_change",
                     # "data": "song"
