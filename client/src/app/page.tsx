@@ -9,7 +9,7 @@ import {
 } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
+import { Loader } from "lucide-react";
 import { WebsocketContext } from "@/components/socket";
 
 interface LyricPart {
@@ -68,7 +68,7 @@ interface MadlibLineProps {
 interface MadlibInputProps extends MadlibLineProps {
     updateValue: (
         props: MadlibLineProps,
-        e: ChangeEvent<HTMLInputElement>,
+        e: ChangeEvent<HTMLInputElement>
     ) => void;
 }
 
@@ -82,7 +82,7 @@ const InputComponent = (props: MadlibInputProps) => {
             onChange={(e) => {
                 updateValue(
                     { verseIndex, inputIndex, numVerses, lyricIndex },
-                    e,
+                    e
                 );
             }}
         />
@@ -90,7 +90,24 @@ const InputComponent = (props: MadlibInputProps) => {
 };
 
 export default function Home() {
-    const lyrics = JSON.parse(example) as LyricPart[];
+    const [songData, setSongData] = useState<string>(example);
+    const [feedback, setFeedback] = useState<"loading" | "done">("loading");
+    useEffect(() => {
+        fetch("http://localhost:8000/lyricstemplate", {
+            method: "GET",
+        })
+            .then(async (res) => {
+                const resBody = await res.json();
+                console.log(resBody.lyrics);
+                setSongData(resBody.lyrics);
+                setFeedback("done");
+            })
+            .catch((reason: any) => {
+                console.error(reason);
+                setFeedback("done");
+            });
+    }, []);
+    const lyrics = JSON.parse(songData) as LyricPart[];
 
     const ws = useContext(WebsocketContext);
 
@@ -112,7 +129,7 @@ export default function Home() {
 
     const handleInputChange = (
         props: MadlibLineProps,
-        e: ChangeEvent<HTMLInputElement>,
+        e: ChangeEvent<HTMLInputElement>
     ) => {
         const { verseIndex, inputIndex, numVerses, lyricIndex } = props;
 
@@ -153,101 +170,126 @@ export default function Home() {
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-between p-24">
-            <div className="main-div space-y-8">
-                {lyrics.map((verse, verseIndex) => {
-                    let lyricsComponents: JSX.Element[] = [];
+            {feedback === "loading" ? (
+                <Loader className="animate-spin w-1/12 h-auto" />
+            ) : (
+                <>
+                    <div className="main-div space-y-8">
+                        {lyrics.map((verse, verseIndex) => {
+                            let lyricsComponents: JSX.Element[] = [];
 
-                    // plan: split each string up by the inputRegex, and then insert a component between each
-                    verse.lyrics.forEach((lyric, lyricIndex) => {
-                        if (lyric.match(inputRegex)) {
-                            // split and generate static components
-                            const staticLyrics = lyric
-                                .split(inputRegex)
-                                .map((staticLyric) => {
+                            // plan: split each string up by the inputRegex, and then insert a component between each
+                            verse.lyrics.forEach((lyric, lyricIndex) => {
+                                if (lyric.match(inputRegex)) {
+                                    // split and generate static components
+                                    const staticLyrics = lyric
+                                        .split(inputRegex)
+                                        .map((staticLyric) => {
+                                            // TODO: replace with static lyric
+                                            return (
+                                                <span
+                                                    key={
+                                                        "" +
+                                                        verseIndex +
+                                                        lyricIndex +
+                                                        staticLyric
+                                                    }
+                                                >
+                                                    {staticLyric}
+                                                </span>
+                                            );
+                                        });
+
+                                    // Use flatMap to insert the separator component between each element
+                                    const inputAndStaticArray =
+                                        staticLyrics.flatMap(
+                                            (component, index) =>
+                                                index < staticLyrics.length - 1
+                                                    ? [
+                                                          component,
+                                                          <InputComponent
+                                                              verseIndex={
+                                                                  verseIndex
+                                                              }
+                                                              inputIndex={index}
+                                                              numVerses={
+                                                                  lyrics.length
+                                                              }
+                                                              lyricIndex={
+                                                                  lyricIndex
+                                                              }
+                                                              updateValue={
+                                                                  handleInputChange
+                                                              }
+                                                              key={
+                                                                  "" +
+                                                                  index +
+                                                                  lyricIndex
+                                                              }
+                                                          />,
+                                                      ]
+                                                    : [component]
+                                        );
+
+                                    // join the array
+                                    lyricsComponents =
+                                        lyricsComponents.concat(
+                                            inputAndStaticArray
+                                        );
+                                } else {
+                                    // return just the text
                                     // TODO: replace with static lyric
-                                    return (
-                                        <span
-                                            key={
-                                                "" +
-                                                verseIndex +
-                                                lyricIndex +
-                                                staticLyric
-                                            }
-                                        >
-                                            {staticLyric}
-                                        </span>
-                                    );
-                                });
-
-                            // Use flatMap to insert the separator component between each element
-                            const inputAndStaticArray = staticLyrics.flatMap(
-                                (component, index) =>
-                                    index < staticLyrics.length - 1
-                                        ? [
-                                              component,
-                                              <InputComponent
-                                                  verseIndex={verseIndex}
-                                                  inputIndex={index}
-                                                  numVerses={lyrics.length}
-                                                  lyricIndex={lyricIndex}
-                                                  updateValue={
-                                                      handleInputChange
-                                                  }
-                                                  key={"" + index + lyricIndex}
-                                              />,
-                                          ]
-                                        : [component],
-                            );
-
-                            // join the array
-                            lyricsComponents =
-                                lyricsComponents.concat(inputAndStaticArray);
-                        } else {
-                            // return just the text
-                            // TODO: replace with static lyric
-                            lyricsComponents.push(<span>{lyric}</span>);
-                        }
-
-                        // now push a break for fomatting
-                        lyricsComponents.push(<br />);
-                    });
-
-                    /* If we're currently not on the verse, don't render */
-                    if (verseIndex != stage) {
-                        return null;
-                    }
-
-                    // now, render the whole lyric part
-                    return (
-                        <div key={`lyric-part-${verseIndex}`}>
-                            <div>
-                                <h6 className="text-2xl font-bold">
-                                    {verse.part}
-                                </h6>
-                                {lyricsComponents.map((component, index) => (
-                                    <span key={index}>{component}</span>
-                                ))}
-                            </div>
-
-                            <Button
-                                onClick={() =>
-                                    setStage((prevStage) => prevStage + 1)
+                                    lyricsComponents.push(<span>{lyric}</span>);
                                 }
-                                disabled={!isFilled}
-                            >
-                                Submit
-                            </Button>
-                        </div>
-                    );
-                })}
-            </div>
-            <button
-                onClick={() => {
-                    ws.send("test");
-                }}
-            >
-                Submit
-            </button>
+
+                                // now push a break for fomatting
+                                lyricsComponents.push(<br />);
+                            });
+
+                            /* If we're currently not on the verse, don't render */
+                            if (verseIndex != stage) {
+                                return null;
+                            }
+
+                            // now, render the whole lyric part
+                            return (
+                                <div key={`lyric-part-${verseIndex}`}>
+                                    <div>
+                                        <h6 className="text-2xl font-bold">
+                                            {verse.part}
+                                        </h6>
+                                        {lyricsComponents.map(
+                                            (component, index) => (
+                                                <span key={index}>
+                                                    {component}
+                                                </span>
+                                            )
+                                        )}
+                                    </div>
+
+                                    <Button
+                                        onClick={() =>
+                                            setStage(
+                                                (prevStage) => prevStage + 1
+                                            )
+                                        }
+                                        disabled={!isFilled}
+                                    >
+                                        Submit
+                                    </Button>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <button
+                        onClick={() => {
+                            ws.send("test");
+                        }}
+                    >
+                        Submit
+                    </button>
+                </>
+            )}
         </main>
     );
 }

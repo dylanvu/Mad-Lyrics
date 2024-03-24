@@ -4,7 +4,26 @@ import openai
 from dotenv import load_dotenv
 import os
 
+from starlette.middleware.cors import CORSMiddleware
+
 load_dotenv()
+
+app = FastAPI()
+
+origins = [
+    "http://localhost:3000",
+    "http://localhost:3000/*",
+    # "http://localhost",
+    # "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 openai.api_key = os.getenv("OPEN_AI_API_KEY")
 
@@ -34,9 +53,6 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 
-app = FastAPI(
-    
-)
 
 @app.get("/helloworld")
 # function handles requests that go to path "/" with the "get" operation
@@ -123,12 +139,54 @@ async def get_lyrics():
 Generate new JSON lyrics following the same schema. Continue to replace words/phrases in each line with mad-libs, annotated by the proper type of speech ie. {noun}. Make four verses.
 """}
     ]
-
     chat = openai.chat.completions.create( 
             model="gpt-4-turbo-preview", messages=prompt 
         )
     
     reply = chat.choices[0].message.content 
+#     reply = """
+# [
+#   {
+#     "part": "Verse",
+#     "lyrics": [
+#       "The wind in the night, it whispers so {adjective},",
+#       "Carrying tales from the {noun} so {adjective}.",
+#       "My {noun} in my hand, ancient and {adjective},",
+#       "Across the endless fields, our shadows {verb}."
+#     ]
+#   },
+#   {
+#     "part": "Chorus",
+#     "lyrics": [
+#       "With every step, I grow {adjective},",
+#       "In a realm where {noun} softly {verb}.",
+#       "But by your {noun}, I sail my {noun},",
+#       "And in your voice, the {noun} I've long {verb}."
+#     ]
+#   },
+#   {
+#     "part": "Bridge",
+#     "lyrics": [
+#       "Under the gaze of the {noun}, we {verb},",
+#       "To the rhythm that makes our hearts {verb},",
+#       "Side by side, we {verb} and {verb},",
+#       "In this {noun} dream, where hope brightly {verb}."
+#     ]
+#   },
+#   {
+#     "part": "Outro",
+#     "lyrics": [
+#       "Here's to the {noun}, the light, and the {noun},",
+#       "On this path, we're forever {adjective}.",
+#       "From dawn to dusk, under the sky's {noun},",
+#       "Together, into the unknown we {verb}."
+#     ]
+#   }
+# ]
+# """
+    reply = reply.replace("```json", "")
+    reply = reply.replace("```", "")
+    reply = reply.strip()
     print(f"ChatGPT: {reply}") 
     return {"lyrics": reply}
 
