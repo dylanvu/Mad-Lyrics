@@ -26,7 +26,7 @@ export default function Lobby() {
     }, [router, ws.phase]);
 
     return (
-        <main className="flex-between h-screen min-h-screen p-16">
+        <main className="flex-between h-screen min-h-screen bg-[url('/images/lobbyBackground.svg')] p-16">
             {/* <div className="main-div">lobby</div>
 
             <Button onClick={handleStart}>Start Game</Button>
@@ -79,7 +79,10 @@ export default function Lobby() {
                     </div>
                 </div>
 
-                <Button className="h-20 w-full rounded-2xl bg-jas-purple px-8 py-6 hover:bg-jas-purple/80" onClick={handleStart}>
+                <Button
+                    className="h-20 w-full rounded-2xl bg-jas-purple px-8 py-6 hover:bg-jas-purple/80"
+                    onClick={handleStart}
+                >
                     <p className="text-center text-3xl font-bold">Start game</p>
                 </Button>
             </div>
