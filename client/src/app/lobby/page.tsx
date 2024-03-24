@@ -1,15 +1,30 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { useEffect, useContext } from "react";
+
+import { useEffect, useContext, useState } from "react";
 
 import { WebsocketContext } from "@/components/socket";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { Dices, User } from "lucide-react";
+import { Check, Dices, User, X } from "lucide-react";
+
+function uuidToNumber(uuid: string) {
+    let hash = 0;
+    for (let i = 0; i < uuid.length; i++) {
+        hash += uuid.charCodeAt(i);
+    }
+    return hash;
+}
 
 export default function Lobby() {
     const ws = useContext(WebsocketContext);
     const router = useRouter();
+
+    const [players, setPlayers] = useState<string[]>([
+        "fsdfsdf",
+        "joe",
+        "supergirlygmaer",
+    ]);
 
     const handleStart = () => {
         // send start event to all clients
@@ -20,6 +35,12 @@ export default function Lobby() {
     };
 
     useEffect(() => {
+        setPlayers(players);
+
+        console.log(players);
+    }, [players, ws.players]);
+
+    useEffect(() => {
         if (ws.phase === "input") {
             router.push("/"); // FIXME: When we swap URLs, make sure to update this too
         }
@@ -27,51 +48,46 @@ export default function Lobby() {
 
     return (
         <main className="flex-between h-screen min-h-screen bg-[url('/images/lobbyBackground.svg')] p-16">
-            {/* <div className="main-div">lobby</div>
-            <Button onClick={handleStart}>Start Game</Button>
-            <p>{ws.ready ? "Connected!" : "Not connected )="}</p> */}
-
             <div className="flex-between h-full min-w-[500px] flex-col rounded-3xl bg-[#191B21] px-9 pb-9 pt-12 text-white">
-                {/* lobby tag */}
                 <div className="w-full">
                     <div className="flex-between pb-8">
                         <h2
-                            className="h-full text-4xl font-black text-jas-purple"
+                            className="flex h-full items-center space-x-2 text-4xl font-black text-jas-purple"
                             style={{
                                 WebkitTextStroke: "white",
-                                WebkitTextStrokeWidth: 2,
+                                WebkitTextStrokeWidth: 1.5,
                             }}
                         >
-                            Lobby
+                            <p>Lobby</p>
+                            {ws.ready ? (
+                                <Check className="h-8 w-8 text-green-500" />
+                            ) : (
+                                <X className="h-8 w-8 text-red-500" />
+                            )}
                         </h2>
                         <p className="text-2xl font-bold">3 players</p>
                     </div>
 
                     <div className="mb-auto space-y-4">
-                        <div className="flex-between rounded-2xl border-4 border-jas-gray bg-jas-card p-4 py-1 text-white hover:cursor-pointer hover:border-jas-purple">
-                            <img
-                                src="./images/cat.svg"
-                                alt="cat"
-                                className="scale-100"
-                            />
-                            <p className="text-3xl font-bold">SuperEpicGamer</p>
-                        </div>
-                        <div className="flex-between rounded-2xl border-4 border-jas-gray bg-jas-card p-4 py-1 text-white hover:cursor-pointer hover:border-jas-purple">
-                            <img
-                                src="./images/bird.svg"
-                                alt="cat"
-                                className="scale-100"
-                            />
-                            <p className="text-3xl font-bold">SuperEpicGamer</p>
-                        </div>
-                        <div className="flex-between rounded-2xl border-4 border-jas-gray bg-jas-card p-4 py-1 text-white hover:cursor-pointer hover:border-jas-purple">
-                            <img
-                                src="./images/mouse.svg"
-                                alt="cat"
-                                className="scale-90"
-                            />
-                            <p className="text-3xl font-bold">SuperEpicGamer</p>
-                        </div>
+                        {players.map((player) => (
+                            <div
+                                className="flex-between rounded-2xl border-4 border-jas-gray bg-jas-card p-4 py-1 text-white hover:border-jas-purple"
+                                key={player}
+                            >
+                                <img
+                                    src={
+                                        uuidToNumber(player) % 3 == 0
+                                            ? "./images/cat.svg"
+                                            : uuidToNumber(player) % 3 == 1
+                                              ? "./images/bird.svg"
+                                              : "./images/mouse.svg"
+                                    }
+                                    alt="cat"
+                                    className="scale-90"
+                                />
+                                <p className="text-3xl font-bold">{player}</p>
+                            </div>
+                        ))}
 
                         <p className="pt-2 text-center text-xl font-bold text-white text-opacity-75">
                             waiting for more players...
