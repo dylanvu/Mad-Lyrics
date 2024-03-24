@@ -164,7 +164,7 @@ const Page = () => {
                 </div>
             </div>
 
-            {/* {loading && <LoadingPage />} */}
+            {loading && <LoadingPage />}
         </div>
     );
 };
