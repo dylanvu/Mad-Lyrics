@@ -108,10 +108,24 @@ export default function Home() {
                 setFeedback("done");
             });
     }, []);
+
     const lyrics = JSON.parse(songData) as LyricPart[];
 
     const ws = useContext(WebsocketContext);
 
+    useEffect(() => {
+        if (ws.valueQueue.length) {
+            console.log(ws.valueQueue);
+            // TODO: turn this into audio
+            console.log(ws.valueQueue[0]);
+            // now, pop this out of the queue
+            ws.setQueue((prevQueue) => {
+                const prevCopy = [...prevQueue];
+                prevCopy.shift();
+                return prevCopy;
+            });
+        }
+    }, [ws.valueQueue]);
     /* checks if line contains brackets (input fields) */
     const inputRegex = /\{.*?\}/g;
 

@@ -7,8 +7,8 @@ export default function Lobby() {
     const ws = useContext(WebsocketContext);
 
     useEffect(() => {
-        console.log(ws.value);
-    }, [ws.value]);
+        console.log(ws.valueQueue);
+    }, [ws.valueQueue]);
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-between p-24">
