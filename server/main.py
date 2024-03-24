@@ -1,10 +1,15 @@
 from fastapi import FastAPI, WebSocket
 from pydantic import BaseModel
 import openai
+
+from suno import SongsGen
 from dotenv import load_dotenv
 import os
-
 load_dotenv()
+
+SUNO_COOKIE = os.getenv("SUNO_COOKIE")
+i = SongsGen(SUNO_COOKIE)
+print(i.get_limit_left())
 
 openai.api_key = os.getenv("OPEN_AI_API_KEY")
 
@@ -69,7 +74,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
         while True:
             binary_data = await websocket.receive_bytes()
             await manager.broadcast(binary_data) 
-
+            audio = i.get_mp3(link, stream=False)
+            
     except WebSocketDisconnect:
         print("Disconnecting...")
         manager.disconnect(client_id)
