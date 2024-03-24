@@ -123,7 +123,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                 # })
             elif event == "sample_song":
                 path_to_song = './output/1.mp3'
-                with open(song_path, 'rb') as mp3_file:
+                with open(path_to_song, 'rb') as mp3_file:
                     while True:
                         # reading data in chunks of 4kb
                         chunk = mp3_file.read(4096)
