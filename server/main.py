@@ -35,8 +35,6 @@ app.add_middleware(
 )
 
 SUNO_COOKIE = os.getenv("SUNO_COOKIE")
-GenerateSong = SongsGen(SUNO_COOKIE)
-print(GenerateSong.get_limit_left())
 
 
 
@@ -269,6 +267,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                     # get_songs_custom is a function under suno with the lyrics and genre passed through the combined user prompted genre and gpt generated lyrics
                     print("LYRICS: " + replaced_lyrics)
                     print("GENRE: " + genre)
+                    GenerateSong = SongsGen(SUNO_COOKIE)
+                    print(GenerateSong.get_limit_left())
                     output = GenerateSong.get_songs_custom(replaced_lyrics, genre)
                     
                     obj = {
