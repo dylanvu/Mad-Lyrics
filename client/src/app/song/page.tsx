@@ -5,6 +5,95 @@ import { WebsocketContext } from "@/components/socket";
 import { Loader } from "lucide-react";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import Visualizer from "../visualizer/page";
+import { Progress } from "@/components/ui/progress";
+
+const LoadingPage = () => {
+    const [progress, setProgress] = useState(7);
+
+    useEffect(() => {
+        const interval = setInterval(
+            () => {
+                setProgress((prevProgress) =>
+                    prevProgress >= 80
+                        ? prevProgress
+                        : prevProgress + Math.random() * 10,
+                );
+            },
+            Math.random() * 1500 + 1000,
+        );
+
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <div className="flex min-h-screen flex-col items-center px-32 pb-9 pt-12 text-white">
+            <div className="flex-center w-full rounded-2xl bg-jas-card p-6 text-2xl font-bold text-white">
+                <h6>Generating your next favorite tune...</h6>
+            </div>
+
+            <div className="flex-center flex-col pt-6">
+                <img
+                    src="./loading_cat.gif"
+                    alt="loading cat"
+                    className="h-56"
+                />
+                <div className="flex-center w-[700px] flex-col space-y-4 rounded-2xl bg-jas-card p-6 px-14 py-6 text-3xl font-bold text-white">
+                    <p className="text-xl text-white text-opacity-50">
+                        did you know...
+                    </p>
+                    <p className="text-center">
+                        Sunt in aliquip aute duis officia minim ex ad officia
+                        id.
+                    </p>
+                </div>
+            </div>
+
+            <Progress
+                value={progress}
+                className="my-8 h-8 w-[700px] transition duration-2000"
+            />
+
+            <div className="h-[300px] w-[700px] space-y-4 rounded-2xl border-4 border-jas-gray py-7">
+                <h6 className="text-center text-3xl font-semibold">
+                    # of Mad Lyrics
+                </h6>
+
+                <div className="flex-center space-x-8">
+                    <div className="space-y-2">
+                        <img
+                            src="./images/cat.svg"
+                            alt="cat"
+                            className="w-36"
+                        />
+                        <p className="text-center text-2xl font-bold">
+                            14 Words
+                        </p>
+                    </div>
+                    <div className="space-y-2">
+                        <img
+                            src="./images/bird.svg"
+                            alt="bird"
+                            className="w-36"
+                        />
+                        <p className="text-center text-2xl font-bold">
+                            11 Words
+                        </p>
+                    </div>
+                    <div className="space-y-2">
+                        <img
+                            src="./images/mouse.svg"
+                            alt="mouse"
+                            className="w-36"
+                        />
+                        <p className="text-center text-2xl font-bold">
+                            7 Words
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const Page = () => {
     const ws = useContext(WebsocketContext);
@@ -50,9 +139,15 @@ const Page = () => {
         }
     };
 
+    if (loading) {
+        return <LoadingPage />;
+    }
+
     return (
         <div className="flex max-h-screen min-h-screen flex-row gap-20 px-32 pb-9 pt-12 text-white">
             <div className="max-h-full min-h-[calc(100vh-80px)] w-[50%] grow">
+                <img src="./loading.gif" alt="loading" />
+
                 <h1 className="text-center text-5xl font-bold">
                     Your Mad Lyrics
                 </h1>
