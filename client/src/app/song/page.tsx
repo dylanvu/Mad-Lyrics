@@ -122,24 +122,13 @@ const Page = () => {
                 </h1>
 
                 <div className="flex-between mt-8 min-h-[calc(100vh-164px)] grow flex-col rounded-2xl border-4 border-jas-gray bg-jas-card px-14 py-8">
-                    {/* <img
-                        src="https://media.swncdn.com/via/images/2023/08/11/32042/32042-seraphim_source_file.jpg"
-                        alt="visualizer placeholder"
-                        className="h-[400px] w-full rounded-2xl object-cover"
-                    /> */}
-
                     <div className="flex-center h-[500px] w-[600px] rounded-xl pt-16">
-                        
                         <Visualizer audioRef={audioElementRef} />
                     </div>
 
                     <h6 className="py-4 text-center text-6xl font-bold">
                         {ws.finishedSongData.title}
                     </h6>
-
-                    {/* <div className="mb-8 mt-auto">
-                        <Base64AudioPlayer base64String={audioChunk} />
-                    </div> */}
                 </div>
             </div>
 
@@ -160,7 +149,8 @@ const Page = () => {
                     </div>
                 </div>
             </div>
-            {loading && <LoadingPage />}
+
+            {/* {loading && <LoadingPage />} */}
         </div>
     );
 };

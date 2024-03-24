@@ -48,7 +48,7 @@ export default function Visualizer({ audioRef }) {
     };
 
     return (
-        <div className="flex-center flex-col">
+        <div className="flex-center flex-col space-y-4">
             {analyzerData ? (
                 <Waveform3D analyzerData={analyzerData} />
             ) : (

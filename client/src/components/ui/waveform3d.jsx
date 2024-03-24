@@ -21,7 +21,7 @@ const WaveForm3D = ({ analyzerData }) => {
         camera.position.set(0, 0, 100);
 
         const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(600, 500);
+        renderer.setSize(window.innerWidth / 3, window.innerHeight / 2);
         mountRef.current.appendChild(renderer.domElement);
 
         const controls = new OrbitControls(camera, renderer.domElement);
