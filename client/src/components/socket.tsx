@@ -8,6 +8,7 @@ import {
     SetStateAction,
 } from "react";
 
+import crypto from "crypto";
 interface ISocketContext {
     /**
      * if the socket is connected
@@ -24,6 +25,7 @@ interface ISocketContext {
      */
     send: (data: string | ArrayBufferLike | Blob | ArrayBufferView) => void;
     setQueue: Dispatch<SetStateAction<string[]>>;
+    phase: "lobby" | "input" | "waiting" | "song";
 }
 
 export const WebsocketContext = createContext<ISocketContext>({
@@ -31,6 +33,7 @@ export const WebsocketContext = createContext<ISocketContext>({
     valueQueue: [],
     send: () => {},
     setQueue: () => {},
+    phase: "lobby",
 });
 
 export const WebsocketProvider = ({
@@ -40,11 +43,14 @@ export const WebsocketProvider = ({
 }) => {
     const [isReady, setIsReady] = useState(false);
     const [valQueue, setValQueue] = useState<string[]>([]);
+    const [client_id, setClientId] = useState("");
 
     const ws = useRef<WebSocket | null>(null);
 
     useEffect(() => {
-        const socket = new WebSocket("ws://localhost:8000/ws?client_id=123");
+        const id = crypto.randomUUID();
+        setClientId(id);
+        const socket = new WebSocket(`ws://localhost:8000/ws?client_id=${id}`);
 
         socket.onopen = () => setIsReady(true);
         socket.onclose = () => setIsReady(false);
@@ -85,6 +91,7 @@ export const WebsocketProvider = ({
         //           return;
         //       },
         setQueue: setValQueue,
+        phase: "lobby",
     };
 
     return (

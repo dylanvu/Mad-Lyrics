@@ -45,13 +45,16 @@ class ConnectionManager:
     # initializes ws and adds to active connections inside of a dictionary
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
+        self.ready_players: Dict[str, bool]
     # establish connection btwn a client and ws. waits for ws to start and adds accepted client to active connections
     async def connect(self, websocket: WebSocket, client_id: str):
         await websocket.accept()
         self.active_connections[client_id] = websocket
+        self.ready_players[client_id] = False
     # disconnects client from ws
     def disconnect(self, client_id: str):
         del self.active_connections[client_id]
+        del self.ready_players[client_id]
     #  converts music into binary which it then sends as bytes
     async def send_personal_message(self, data: dict, websocket: WebSocket):
         await websocket.send_json(data)
@@ -88,6 +91,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
     if client_id is None:
         await websocket.close(code=4001)
         return
+    # save this client into server memory
     await manager.connect(websocket, client_id)      
     try:
         while True:
@@ -114,6 +118,12 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                     "audio_data": utf
                 }
                 # waits for broadcasting to run
+                await manager.broadcast(obj)
+                # move all players to the song page
+                obj = {
+                    "event": "phase_change",
+                    "data": "song"
+                }
                 await manager.broadcast(obj)
 
                 # audio = GenerateSong.get_mp3(link, stream=True)
@@ -153,6 +163,12 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                         "audio_data": utf
                     }
                     await manager.broadcast(obj)
+                    # move all players to the song page
+                    obj = {
+                        "event": "phase_change",
+                        "data": "song"
+                    }
+                    await manager.broadcast(obj)
                     # while True:
                     #     # reading data in chunks of 4kb
                     #     chunk = mp3_file.read(4096)
@@ -166,6 +182,28 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                     #     }
                     #     await manager.broadcast(obj)
             
+            elif event == "start":
+                # This should bring players from the lobby to the input screen
+                obj = {
+                    "event": "phase_change",
+                    "data": "input"
+                }
+                await manager.broadcast(obj)
+            elif event == "finished":
+                # parse out the event data to get which player finished
+                # expect: {"event": "finished", "id": string}
+                id = data["id"]
+                manager.ready_players[id] = True
+                # if all players are ready, move them to the waiting screen
+                all_ready = all(value for value in manager.ready_players.values())
+                if all_ready:
+                    # bring all players to the moving screen
+                    obj = {
+                    "event": "phase_change",
+                    "data": "waiting"
+                    }
+                    await manager.broadcast(obj)
+
     except WebSocketDisconnect:
         print("Disconnecting...")
         manager.disconnect(client_id)
