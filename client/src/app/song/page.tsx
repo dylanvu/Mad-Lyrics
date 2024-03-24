@@ -117,6 +117,7 @@ const Page = () => {
         console.log("playing check", !isPlaying.current);
 
         if (ws.audioQueueRef.current.length > 0 && !isPlaying.current) {
+            setLoading(false);
             console.log("playing");
             isPlaying.current = true;
             const audioBlob = ws.audioQueueRef.current.shift(); // Get the next audio blob from the queue
@@ -146,8 +147,6 @@ const Page = () => {
     return (
         <div className="flex max-h-screen min-h-screen flex-row gap-20 px-32 pb-9 pt-12 text-white">
             <div className="max-h-full min-h-[calc(100vh-80px)] w-[50%] grow">
-                <img src="./loading.gif" alt="loading" />
-
                 <h1 className="text-center text-5xl font-bold">
                     Your Mad Lyrics
                 </h1>
