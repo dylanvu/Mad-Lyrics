@@ -149,7 +149,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                         print("chunk", flush=True)
                         if not chunk:
                             break
+                        #translates bits and bytes into text
                         b64 = base64.b64encode(chunk)
+                        # translates the text into a universally understandable language for diff computers
                         utf = b64.decode('utf-8')
                         obj = {
                             "event": "audio",
