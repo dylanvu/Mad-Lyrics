@@ -44,15 +44,21 @@ export const WebsocketProvider = ({
     const ws = useRef<WebSocket | null>(null);
 
     useEffect(() => {
-        const socket = new WebSocket("wss://localhost:8000/");
+        const socket = new WebSocket("ws://localhost:8000/ws?client_id=123");
 
         socket.onopen = () => setIsReady(true);
         socket.onclose = () => setIsReady(false);
         // socket.onmessage = (event) => setVal(event.data);
-        socket.onmessage = (event) =>
+        socket.onmessage = (event) => {
+            const eventObject = JSON.parse(event.data);
             // TODO: figure out what we sent
-            // if this is audio data, add it to the audio queue
-            setValQueue((prevValQueue) => [...prevValQueue, event.data]);
+            if (eventObject.event === "audio") {
+                // if this is audio data, add it to the audio queue
+                setValQueue((prevValQueue) => {
+                    return [...prevValQueue, eventObject["audio_data"]];
+                });
+            }
+        };
 
         ws.current = socket;
 
@@ -64,15 +70,20 @@ export const WebsocketProvider = ({
     const ret: ISocketContext = {
         ready: isReady,
         valueQueue: valQueue,
-        // send: ws.current ? ws.current!.send.bind(ws.current) : () => {},
         send: ws.current
-            ? () => {
-                  console.log(ws.current);
-              }
+            ? ws.current!.send.bind(ws.current)
             : () => {
-                  console.log(ws.current);
+                  console.error("cannot send because not connected");
                   return;
               },
+        // send: ws.current
+        //     ? () => {
+        //           console.log("success:", ws.current);
+        //       }
+        //     : () => {
+        //           console.error("cannot send because not connected");
+        //           return;
+        //       },
         setQueue: setValQueue,
     };
 

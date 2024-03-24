@@ -26,23 +26,25 @@ const Page = () => {
 
     useEffect(() => {
         if (ws.valueQueue.length) {
-            console.log(ws.valueQueue);
             setAudioChunk(ws.valueQueue[0]);
-            console.log(ws.valueQueue[0]);
-            // now, pop this out of the queue
-            ws.setQueue((prevQueue) => {
-                const prevCopy = [...prevQueue];
-                prevCopy.shift();
-                return prevCopy;
-            });
         }
     }, [ws.valueQueue]);
 
     return (
         <div>
-            {audioChunk.length > 0 ? (
+            {audioChunk && audioChunk.length > 0 ? (
                 <Base64AudioPlayer base64String={audioChunk} />
             ) : null}
+            <button
+                onClick={() => {
+                    const jsonString: string = JSON.stringify({
+                        event: "sample_song",
+                    });
+                    ws.send(jsonString);
+                }}
+            >
+                TEST
+            </button>
         </div>
     );
 };
