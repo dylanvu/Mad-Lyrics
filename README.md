@@ -21,7 +21,7 @@
   <br>
 </p>
 
-### 🏅 Uncommon Hacks 2024 Best Programmatic Art
+### 🏅 Uncommon Hacks 2024 Best in Track: Programmatic Art
 
 <br>
 
