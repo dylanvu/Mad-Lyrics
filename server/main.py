@@ -6,7 +6,27 @@ import base64
 from suno import SongsGen
 from dotenv import load_dotenv
 import os
+
+from starlette.middleware.cors import CORSMiddleware
+
 load_dotenv()
+
+app = FastAPI()
+
+origins = [
+    "http://localhost:3000",
+    "http://localhost:3000/*",
+    # "http://localhost",
+    # "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 SUNO_COOKIE = os.getenv("SUNO_COOKIE")
 GenerateSong = SongsGen(SUNO_COOKIE)
@@ -39,9 +59,6 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 
-app = FastAPI(
-    
-)
 
 @app.get("/helloworld")
 # function handles requests that go to path "/" with the "get" operation
@@ -113,53 +130,69 @@ async def get_lyrics():
         {"role": "system", "content": "You are a intelligent assistant."},
 
         {"role": "user", "content": """
+You will generate a mad-libs puzzle and output the mad-libs in a JSON schema. Here is an example of the JSON schema I want:
 [
   {
     "part": "Verse",
-    "lyrics": [
-      "The stars at night, they shine so {adjective},",
-      "Guiding me through the {noun} so {adjective}.",
-      "My {noun} by my side, steady and {adjective},",
-      "Through the silent streets, our spirits {verb}."
-    ]
+    "lyrics": string[]
   },
-  {
-    "part": "Chorus",
-    "lyrics": [
-      "With every heartbeat, I feel {adjective},",
-      "In a world where {noun} often {verb}.",
-      "But in your {noun}, I find my {noun},",
-      "And in your eyes, the {noun} I've always {verb}."
-    ]
-  },
-  {
-    "part": "Bridge",
-    "lyrics": [
-      "In the quiet of the {noun}, we {verb},",
-      "To the music that makes our souls {verb},",
-      "Hand in hand, we {verb} and {verb},",
-      "In our {noun} world, where love never {verb}."
-    ]
-  },
-  {
-    "part": "Outro",
-    "lyrics": [
-      "So here's to our {noun}, our bond, and our {noun},",
-      "In this journey, we're never {adjective}.",
-      "From {noun} to {noun}, under the {noun}'s glow,",
-      "Together, into the future we {verb}."
-    ]
-  }
 ]
-Generate new JSON lyrics following the same schema. Continue to replace words/phrases in each line with mad-libs, annotated by the proper type of speech ie. {noun}. Make four verses.
+Create lyrics following the same JSON schema. The lyrics themselves should be quite different from what I put, as well as the mad libs. My example only applies to the JSON format. The mad libs should be annotated by the proper type of speech ie. {noun}. The valid parts of speech are: noun, adjective, verb, and adverb. 
+
+Make four verses: Verse, Chorus, Bridge,  and Outro. Each verses will have 4 lines.
+Never have two mad-libs next to each other in the same line. For example, {adjective} {noun} is invalid.
+
+Have only 1 mad lib per line. There must be 1 mad-lib per line.
 """}
     ]
-
     chat = openai.chat.completions.create( 
             model="gpt-4-turbo-preview", messages=prompt 
         )
     
     reply = chat.choices[0].message.content 
+#     reply = """
+# [
+#   {
+#     "part": "Verse",
+#     "lyrics": [
+#       "The wind in the night, it whispers so {adjective},",
+#       "Carrying tales from the {noun} so {adjective}.",
+#       "My {noun} in my hand, ancient and {adjective},",
+#       "Across the endless fields, our shadows {verb}."
+#     ]
+#   },
+#   {
+#     "part": "Chorus",
+#     "lyrics": [
+#       "With every step, I grow {adjective},",
+#       "In a realm where {noun} softly {verb}.",
+#       "But by your {noun}, I sail my {noun},",
+#       "And in your voice, the {noun} I've long {verb}."
+#     ]
+#   },
+#   {
+#     "part": "Bridge",
+#     "lyrics": [
+#       "Under the gaze of the {noun}, we {verb},",
+#       "To the rhythm that makes our hearts {verb},",
+#       "Side by side, we {verb} and {verb},",
+#       "In this {noun} dream, where hope brightly {verb}."
+#     ]
+#   },
+#   {
+#     "part": "Outro",
+#     "lyrics": [
+#       "Here's to the {noun}, the light, and the {noun},",
+#       "On this path, we're forever {adjective}.",
+#       "From dawn to dusk, under the sky's {noun},",
+#       "Together, into the unknown we {verb}."
+#     ]
+#   }
+# ]
+# """
+    reply = reply.replace("```json", "")
+    reply = reply.replace("```", "")
+    reply = reply.strip()
     print(f"ChatGPT: {reply}") 
     return {"lyrics": reply}
 
