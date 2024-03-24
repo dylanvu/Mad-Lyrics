@@ -39,7 +39,7 @@ const Page = () => {
             audioChunk === undefined ||
             audioChunk === null ||
             audioChunk.length === 0 ? (
-                <Loader className="animate-spin w-20 h-20 transition duration-3000" />
+                <Loader className="h-20 w-20 animate-spin transition duration-3000" />
             ) : (
                 <Base64AudioPlayer base64String={audioChunk} />
             )}

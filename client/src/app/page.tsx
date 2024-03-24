@@ -207,7 +207,7 @@ export default function Home() {
                         <div className="flex-center w-full rounded-2xl bg-jas-card p-6 text-4xl font-bold text-white">
                             <h6>Enter song lyrics for the&nbsp;</h6>
                             <span className="text-jas-purple">
-                                {lyrics[stage].part}&nbsp;
+                                {lyrics[stage]?.part}&nbsp;
                             </span>
                             <span>{`(${stage + 1}/${lyrics.length})`}</span>
                         </div>
