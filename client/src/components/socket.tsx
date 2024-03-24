@@ -8,7 +8,9 @@ import {
     SetStateAction,
 } from "react";
 
-import crypto from "crypto";
+import { v4 } from "uuid";
+
+type validPhases = "lobby" | "input" | "waiting" | "song";
 interface ISocketContext {
     /**
      * if the socket is connected
@@ -25,15 +27,17 @@ interface ISocketContext {
      */
     send: (data: string | ArrayBufferLike | Blob | ArrayBufferView) => void;
     setQueue: Dispatch<SetStateAction<string[]>>;
-    phase: "lobby" | "input" | "waiting" | "song";
+    phase: validPhases;
 }
+
+const startingPhase = "lobby";
 
 export const WebsocketContext = createContext<ISocketContext>({
     ready: false,
     valueQueue: [],
     send: () => {},
     setQueue: () => {},
-    phase: "lobby",
+    phase: startingPhase,
 });
 
 export const WebsocketProvider = ({
@@ -44,12 +48,13 @@ export const WebsocketProvider = ({
     const [isReady, setIsReady] = useState(false);
     const [valQueue, setValQueue] = useState<string[]>([]);
     const [client_id, setClientId] = useState("");
+    const [currentPhase, setPhase] = useState<validPhases>(startingPhase);
 
     const ws = useRef<WebSocket | null>(null);
 
     useEffect(() => {
         const id = crypto.randomUUID();
-        setClientId(id);
+        setClientId(v4());
         const socket = new WebSocket(`ws://localhost:8000/ws?client_id=${id}`);
 
         socket.onopen = () => setIsReady(true);
@@ -63,6 +68,8 @@ export const WebsocketProvider = ({
                 setValQueue((prevValQueue) => {
                     return [...prevValQueue, eventObject["audio_data"]];
                 });
+            } else if (eventObject.event === "phase_change") {
+                setPhase(eventObject.data);
             }
         };
 
@@ -91,7 +98,7 @@ export const WebsocketProvider = ({
         //           return;
         //       },
         setQueue: setValQueue,
-        phase: "lobby",
+        phase: currentPhase,
     };
 
     return (

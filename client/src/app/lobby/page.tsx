@@ -10,14 +10,18 @@ export default function Lobby() {
     const router = useRouter();
 
     const handleStart = () => {
-        router.push("/"); // FIXME: When we swap URLs, make sure to update this too
-
-        // TODO: Send start event to all clients
+        // send start event to all clients
+        const jsonString: string = JSON.stringify({
+            event: "start",
+        });
+        ws.send(jsonString);
     };
 
     useEffect(() => {
-        console.log(ws.valueQueue);
-    }, [ws.valueQueue]);
+        if (ws.phase === "input") {
+            router.push("/"); // FIXME: When we swap URLs, make sure to update this too
+        }
+    }, [ws.phase]);
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-between p-24">
