@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { WebsocketContext } from "@/components/socket";
@@ -34,26 +35,91 @@ const Page = () => {
     }, [ws.valueQueue]);
 
     return (
-        <div>
-            {loading ||
-            audioChunk === undefined ||
-            audioChunk === null ||
-            audioChunk.length === 0 ? (
-                <Loader className="h-20 w-20 animate-spin transition duration-3000" />
-            ) : (
-                <Base64AudioPlayer base64String={audioChunk} />
-            )}
+        // <div>
+        //     {loading ||
+        //     audioChunk === undefined ||
+        //     audioChunk === null ||
+        //     audioChunk.length === 0 ? (
+        //         <Loader className="h-20 w-20 animate-spin transition duration-3000" />
+        //     ) : (
+        //         <Base64AudioPlayer base64String={audioChunk} />
+        //     )}
 
-            {/* <button
-                onClick={() => {
-                    const jsonString: string = JSON.stringify({
-                        event: "sample_song",
-                    });
-                    ws.send(jsonString);
-                }}
-            >
-                TEST
-            </button> */}
+        //     {/* <button
+        //         onClick={() => {
+        //             const jsonString: string = JSON.stringify({
+        //                 event: "sample_song",
+        //             });
+        //             ws.send(jsonString);
+        //         }}
+        //     >
+        //         TEST
+        //     </button> */}
+        // </div>
+        <div className="flex max-h-screen min-h-screen flex-row gap-20 px-32 pb-9 pt-12 text-white">
+            <div className="max-h-full min-h-[calc(100vh-80px)] w-[50%] grow">
+                <h1 className="text-center text-5xl font-bold">
+                    Your Mad Lyrics
+                </h1>
+
+                <div className="flex-center mt-8 min-h-[calc(100vh-164px)] grow flex-col rounded-2xl border-4 border-jas-gray bg-jas-card px-14 py-8">
+                    <img
+                        src="https://media.swncdn.com/via/images/2023/08/11/32042/32042-seraphim_source_file.jpg"
+                        alt="visualizer placeholder"
+                        className="h-[400px] w-full rounded-2xl object-cover"
+                    />
+
+                    <h6 className="py-4 text-center text-4xl font-bold">
+                        the roblox song
+                    </h6>
+
+                    <div className="mb-8 mt-auto">
+                        <Base64AudioPlayer base64String={audioChunk} />
+                    </div>
+                </div>
+            </div>
+
+            <div className="w-[50%] rounded-2xl bg-jas-card p-16">
+                <div className="h-full space-y-10 overflow-auto">
+                    <h2
+                        className="text-left text-4xl font-extrabold text-jas-purple"
+                        style={{
+                            WebkitTextStroke: "white",
+                            WebkitTextStrokeWidth: 2,
+                        }}
+                    >
+                        Lyrics &nbsp;🎶
+                    </h2>
+
+                    <div className="flex flex-col space-y-8 text-2xl font-medium">
+                        <p>
+                            Cupidatat adipisicing voluptate minim aliquip
+                            aliquip velit nulla qui officia reprehenderit
+                            voluptate. Et ut occaecat ea elit dolore veniam
+                            dolor.
+                        </p>
+                        <p>
+                            Cupidatat adipisicing voluptate minim aliquip
+                            aliquip velit nulla qui officia reprehenderit
+                            voluptate.
+                        </p>
+                        <p>
+                            Cupidatat adipisicing voluptate minim aliquip
+                            aliquip velit nulla qui officia reprehenderit
+                            voluptate. Et ut occaecat ea elit dolore veniam
+                            dolor. Ut ipsum aliquip cupidatat Lorem dolor mollit
+                            qui exercitation et.
+                        </p>
+                        <p>
+                            Cupidatat adipisicing voluptate minim aliquip
+                            aliquip velit nulla qui officia reprehenderit
+                            voluptate. Et ut occaecat ea elit dolore veniam
+                            dolor. Ut ipsum aliquip cupidatat Lorem dolor mollit
+                            qui exercitation et.
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
