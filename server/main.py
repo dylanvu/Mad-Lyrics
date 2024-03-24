@@ -298,7 +298,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
 
     except WebSocketDisconnect:
         print("Disconnecting...")
-        manager.disconnect(client_id)
+        await manager.disconnect(client_id)
 
 # chatgpt 
 @app.get("/lyricstemplate")
