@@ -1,6 +1,7 @@
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 import openai
+import base64
 
 from suno import SongsGen
 from dotenv import load_dotenv
@@ -8,8 +9,7 @@ import os
 load_dotenv()
 
 SUNO_COOKIE = os.getenv("SUNO_COOKIE")
-i = SongsGen(SUNO_COOKIE)
-print(i.get_limit_left())
+GenerateSong = SongsGen(SUNO_COOKIE)
 
 openai.api_key = os.getenv("OPEN_AI_API_KEY")
 
@@ -29,12 +29,12 @@ class ConnectionManager:
     def disconnect(self, client_id: str):
         del self.active_connections[client_id]
     #  converts music into binary which it then sends as bytes
-    async def send_binary_music(self, music_data: bytes, websocket: WebSocket):
-        await websocket.send_bytes(music_data)
+    async def send_personal_message(self, data: dict, websocket: WebSocket):
+        await websocket.send_json(data)
     # shows music to all clients with active connections to the ws
-    async def broadcast(self, music_data: bytes):
+    async def broadcast(self, data: dict):
         for connection in self.active_connections.values():
-            await connection.send_bytes(music_data)
+            await connection.send_json(data)
 
 
 manager = ConnectionManager()
@@ -72,9 +72,34 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
         
     try:
         while True:
-            binary_data = await websocket.receive_bytes()
-            await manager.broadcast(binary_data) 
-            audio = i.get_mp3(link, stream=False)
+            data = await websocket.receive_json()
+            event = data["event"]
+            if event == "generate":
+                print("generate event")
+                lyrics = data["lyrics"]
+                genre = data["genre"]
+                output = GenerateSong.get_songs_custom(lyrics, genre)
+                link = output['song_urls'][0]
+                audio = GenerateSong.get_mp3(link, stream=True)
+                for chunk in audio:
+                    if chunk:
+                        # translates binary to base64 string
+                        b64 = base64.b64encode(chunk)
+                        # translates into string
+                        utf = b64.decode('utf-8')
+                        obj = {
+                            "event": "audio",
+                            "audio_data": utf
+                        }
+                        await manager.broadcast(obj)
+
+            elif event == "lyrics":
+                print("lyrics")
+                # lyrics = lyrics_data["lyrics"][0]
+                # await websocket.send_json({
+                #     "event": "lyrics",
+                #     "data": lyrics
+                # })
             
     except WebSocketDisconnect:
         print("Disconnecting...")
