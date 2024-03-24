@@ -53,14 +53,19 @@ class ConnectionManager:
         self.currentLyrics: str = ""
         self.num_inputs = 0
         self.order_players_by_arrival: List[str] = []
+        self.player_genres: Dict[str, List[List[str]]] = []
+        self.player_emotions: Dict[str, List[List[str]]] = []
+
 
     # establish connection btwn a client and ws. waits for ws to start and adds accepted client to active connections
     async def connect(self, websocket: WebSocket, client_id: str):
         await websocket.accept()
         self.active_connections[client_id] = websocket
-        self.ready_players[client_id] = False
-        self.player_inputs[client_id] = []
+        self.ready_players[client_id] = False # literally spaghetti code
+        self.player_inputs[client_id] = [] # literally spaghetti code
         self.order_players_by_arrival.append(client_id)
+        self.player_genres[client_id] = "" # literally spaghetti code
+        self.player_emotions[client_id] = "" # literally spaghetti code
         print(self.active_connections)
         # send the new connections
         obj = {
@@ -74,6 +79,9 @@ class ConnectionManager:
         del self.active_connections[client_id]
         del self.ready_players[client_id]
         del self.player_inputs[client_id]
+        del self.player_genres[client_id]
+        del self.player_emotions[client_id]
+
         print(self.active_connections)
         # remove player order
         self.order_players_by_arrival = [s for s in self.order_players_by_arrival if s != client_id]
@@ -260,8 +268,16 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                     print(replaced_lyrics)
 
                     # call Suno
-                    # TODO: fix this
-                    genre = "Funny Pop Song"
+                    # choose a random genre
+                    selected_genre = get_random_non_empty_entry(manager.player_genres)
+                    if selected_genre is None:
+                        selected_genre = "Pop"
+
+                    selected_emotion = get_random_non_empty_entry(manager.player_emotions)
+                    if selected_emotion is None:
+                        selected_emotion = "Upbeat"
+
+                    genre = selected_emotion + " " + selected_genre
                     # genre = data["genre"]
                     # create var that calls the function to generate a song using the Suno function "songGen" with the suno api key
                     # get_songs_custom is a function under suno with the lyrics and genre passed through the combined user prompted genre and gpt generated lyrics
@@ -345,6 +361,18 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                     #         }
                     #         await manager.broadcast(obj)
 
+            elif event == "genre":
+                # update genre in backend
+                id = data["id"]
+                genre = data["genre"]
+                manager.player_genres[id] = genre
+
+            elif event == "emotion":
+                # update emotion in backend
+                id = data["id"]
+                emotion = data["emotion"]
+                manager.player_emotions[id] = emotion
+                
     except WebSocketDisconnect:
         print("Disconnecting...")
         await manager.disconnect(client_id)
@@ -446,3 +474,14 @@ Have only 1 mad lib per line. There must be 1 mad-lib per line.
 def generate_random_number(upper_limit):
     return random.randrange(0, upper_limit)
 
+def get_random_non_empty_entry(data_dict):
+    # Filter out entries with string values longer than 0
+    non_empty_entries = {k: v for k, v in data_dict.items() if isinstance(v, str) and len(v) > 0}
+    
+    # If there are non-empty entries, return a random one
+    if non_empty_entries:
+        random_key = random.choice(list(non_empty_entries.keys()))
+        return non_empty_entries[random_key]
+    
+    # If all entries are empty or there are no entries, return None
+    return None
