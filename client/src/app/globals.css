@@ -105,6 +105,7 @@
     border-radius: 28px;
     width: 36vw;
     display: flex;
+    flex-direction: column;
 }
 .profile-contain .heading {
     display: flex;
