@@ -50,6 +50,28 @@ export default function Lobby() {
         }
     }, [router, ws.phase]);
 
+    function handleGenreChange(newVal: string) {
+        // send to backend to update
+        ws.send(
+            JSON.stringify({
+                event: "genre",
+                genre: newVal,
+                id: ws.id,
+            }),
+        );
+    }
+
+    function handleEmotionChange(newVal: string) {
+        // send to backend to update
+        ws.send(
+            JSON.stringify({
+                event: "emotion",
+                genre: newVal,
+                id: ws.id,
+            }),
+        );
+    }
+
     return (
         <main className="flex-between h-screen min-h-screen bg-[url('/images/lobbyBackground.svg')] p-16">
             {/* <div className="main-div">lobby</div>
@@ -184,6 +206,11 @@ export default function Lobby() {
                                             id="music-genre"
                                             name="music-genre"
                                             placeholder="edm"
+                                            onChange={(e) =>
+                                                handleGenreChange(
+                                                    e.target.value,
+                                                )
+                                            }
                                         />
                                     </form>
                                     <form
@@ -198,6 +225,11 @@ export default function Lobby() {
                                             id="music-emotion"
                                             name="music-emotion"
                                             placeholder="exciting"
+                                            onChange={(e) =>
+                                                handleEmotionChange(
+                                                    e.target.value,
+                                                )
+                                            }
                                         />
                                     </form>
                                 </div>
