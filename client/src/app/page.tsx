@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Loader } from "lucide-react";
 import { WebsocketContext } from "@/components/socket";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface LyricPart {
     part: string;
@@ -69,7 +70,7 @@ interface MadlibLineProps {
 interface MadlibInputProps extends MadlibLineProps {
     updateValue: (
         props: MadlibLineProps,
-        e: ChangeEvent<HTMLInputElement>
+        e: ChangeEvent<HTMLInputElement>,
     ) => void;
 }
 
@@ -83,7 +84,7 @@ const InputComponent = (props: MadlibInputProps) => {
             onChange={(e) => {
                 updateValue(
                     { verseIndex, inputIndex, numVerses, lyricIndex },
-                    e
+                    e,
                 );
             }}
         />
@@ -93,25 +94,27 @@ const InputComponent = (props: MadlibInputProps) => {
 export default function Home() {
     const [songData, setSongData] = useState<string>(example);
     const [feedback, setFeedback] = useState<"loading" | "done">("loading");
-    useEffect(() => {
-        fetch("http://localhost:8000/lyricstemplate", {
-            method: "GET",
-        })
-            .then(async (res) => {
-                const resBody = await res.json();
-                console.log(resBody.lyrics);
-                setSongData(resBody.lyrics);
-                setFeedback("done");
-            })
-            .catch((reason: any) => {
-                console.error(reason);
-                setFeedback("done");
-            });
-    }, []);
+
+    // useEffect(() => {
+    //     fetch("http://localhost:8000/lyricstemplate", {
+    //         method: "GET",
+    //     })
+    //         .then(async (res) => {
+    //             const resBody = await res.json();
+    //             console.log(resBody.lyrics);
+    //             setSongData(resBody.lyrics);
+    //             setFeedback("done");
+    //         })
+    //         .catch((reason: any) => {
+    //             console.error(reason);
+    //             setFeedback("done");
+    //         });
+    // }, []);
 
     const lyrics = JSON.parse(songData) as LyricPart[];
 
     const ws = useContext(WebsocketContext);
+    const router = useRouter();
 
     /* checks if line contains brackets (input fields) */
     const inputRegex = /\{.*?\}/g;
@@ -133,7 +136,7 @@ export default function Home() {
 
     const handleInputChange = (
         props: MadlibLineProps,
-        e: ChangeEvent<HTMLInputElement>
+        e: ChangeEvent<HTMLInputElement>,
     ) => {
         const { verseIndex, inputIndex, numVerses, lyricIndex } = props;
 
@@ -174,11 +177,9 @@ export default function Home() {
 
     useEffect(() => {
         const decreaseTimer = () => {
-            if (timer <= 0) {
-                setTimeout(() => {
-                    // setStage((prevStage) => prevStage + 1);
-                    setTimer(15);
-                }, 750);
+            if (timer <= -1) {
+                setTimer(15);
+                setStage((prevStage) => prevStage + 1);
             } else {
                 setTimer((prevTimer) => {
                     return prevTimer - 1;
@@ -186,15 +187,28 @@ export default function Home() {
             }
         };
 
-        const intervalId = setInterval(decreaseTimer, 250);
+        const intervalId = setInterval(decreaseTimer, 100);
 
         return () => clearInterval(intervalId);
     }, [timer]);
 
+    useEffect(() => {
+        if (stage >= lyrics.length) {
+            // TODO: SEND MAD LYRICS TO SERVER
+
+            router.push("/song");
+        }
+    }, [lyrics.length, router, stage]);
+
     return (
         <main className="flex min-h-screen flex-col items-center justify-between p-24">
-            {feedback === "loading" ? (
-                <Loader className="animate-spin w-1/12 h-auto" />
+            {false && feedback === "loading" ? (
+                <div className="flex-center my-auto flex-col space-y-4">
+                    <Loader className="animate-spin w-20 h-20 transition duration-3000" />
+                    <p className="text-2xl font-semibold">
+                        Generating your Mad Lyrics! Hang tight 😼
+                    </p>
+                </div>
             ) : (
                 <>
                     <div className="main-div space-y-8">
@@ -251,13 +265,13 @@ export default function Home() {
                                                               }
                                                           />,
                                                       ]
-                                                    : [component]
+                                                    : [component],
                                         );
 
                                     // join the array
                                     lyricsComponents =
                                         lyricsComponents.concat(
-                                            inputAndStaticArray
+                                            inputAndStaticArray,
                                         );
                                 } else {
                                     // return just the text
@@ -286,43 +300,24 @@ export default function Home() {
                                                 <span key={index}>
                                                     {component}
                                                 </span>
-                                            )
+                                            ),
                                         )}
                                     </div>
-
-                                    <Button
-                                        onClick={() => {
-                                            setStage(
-                                                (prevStage) => prevStage + 1
-                                            );
-                                            setTimer(15);
-                                        }}
-                                        disabled={!isFilled}
-                                    >
-                                        Submit
-                                    </Button>
 
                                     <div className="flex-center mx-auto pt-24">
                                         <p
                                             className={cn(
                                                 "text-3xl",
-                                                timer <= 5 && "text-[#FF0000]"
+                                                timer <= 5 && "text-[#FF0000]",
                                             )}
                                         >
-                                            {timer}
+                                            {Math.max(timer, 0)}
                                         </p>
                                     </div>
                                 </div>
                             );
                         })}
                     </div>
-                    <button
-                        onClick={() => {
-                            ws.send("test");
-                        }}
-                    >
-                        Submit
-                    </button>
                 </>
             )}
         </main>
