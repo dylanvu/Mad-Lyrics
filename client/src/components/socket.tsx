@@ -32,6 +32,7 @@ interface ISocketContext {
     songData: string;
     audioQueueRef: any;
     data: boolean;
+    finishedSongData: { title: string; lyrics: string };
 }
 
 const startingPhase = "lobby";
@@ -46,6 +47,10 @@ export const WebsocketContext = createContext<ISocketContext>({
     songData: "",
     audioQueueRef: [],
     data: false,
+    finishedSongData: {
+        title: "",
+        lyrics: "",
+    },
 });
 
 export const WebsocketProvider = ({
@@ -60,6 +65,10 @@ export const WebsocketProvider = ({
     const [songData, setSongData] = useState("");
     const [data, setData] = useState(false);
     const audioQueueRef = useRef<any>([]);
+    const [finishedSongData, setFinishedSongData] = useState({
+        title: "",
+        lyrics: "",
+    });
 
     const ws = useRef<WebSocket | null>(null);
 
@@ -88,6 +97,11 @@ export const WebsocketProvider = ({
                     type: "audio/mp3",
                 });
                 audioQueueRef.current.push(audioBlob);
+                console.log(eventObject);
+                setFinishedSongData({
+                    title: eventObject.title,
+                    lyrics: eventObject.lyrics,
+                });
                 setData(true);
             } else if (eventObject.event === "phase_change") {
                 setPhase(eventObject.data);
@@ -136,6 +150,7 @@ export const WebsocketProvider = ({
         songData: songData,
         audioQueueRef: audioQueueRef,
         data: data,
+        finishedSongData: finishedSongData,
     };
 
     return (

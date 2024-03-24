@@ -261,6 +261,10 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                     output = GenerateSong.get_songs_custom(replaced_lyrics, genre)
                     # returns a link from the "song url" element inside of the output item in dictionary, stored in link. The first element in the array
                     link = output['song_urls'][0]
+                    print("SUNO OUTPUT:")
+                    print(output)
+                    title = output['song_name']
+                    lyrics = output['lyric']
                     # gets the mp3 associated with each link and sets streaming in websocket to true, meaning that data is sent in chunks
                     audio = GenerateSong.get_mp3(link, stream=True)
                     buffer = BytesIO()
@@ -284,7 +288,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                             # Create a dict object that stores the event as an audio chunk and sets the audio data to utf format
                             obj = {
                                 "event": "audio",
-                                "audio_data": utf
+                                "audio_data": utf,
+                                "title": title,
+                                "lyrics": lyrics
                             }
                             
                             # Wait for broadcasting to run

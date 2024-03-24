@@ -163,7 +163,7 @@ const Page = () => {
                     </div>
 
                     <h6 className="py-4 text-center text-6xl font-bold">
-                        the roblox song
+                        {ws.finishedSongData.title}
                     </h6>
 
                     {/* <div className="mb-8 mt-auto">
@@ -185,31 +185,7 @@ const Page = () => {
                     </h2>
 
                     <div className="flex flex-col space-y-8 text-2xl font-medium">
-                        <p>
-                            Cupidatat adipisicing voluptate minim aliquip
-                            aliquip velit nulla qui officia reprehenderit
-                            voluptate. Et ut occaecat ea elit dolore veniam
-                            dolor.
-                        </p>
-                        <p>
-                            Cupidatat adipisicing voluptate minim aliquip
-                            aliquip velit nulla qui officia reprehenderit
-                            voluptate.
-                        </p>
-                        <p>
-                            Cupidatat adipisicing voluptate minim aliquip
-                            aliquip velit nulla qui officia reprehenderit
-                            voluptate. Et ut occaecat ea elit dolore veniam
-                            dolor. Ut ipsum aliquip cupidatat Lorem dolor mollit
-                            qui exercitation et.
-                        </p>
-                        <p>
-                            Cupidatat adipisicing voluptate minim aliquip
-                            aliquip velit nulla qui officia reprehenderit
-                            voluptate. Et ut occaecat ea elit dolore veniam
-                            dolor. Ut ipsum aliquip cupidatat Lorem dolor mollit
-                            qui exercitation et.test
-                        </p>
+                        <p>{ws.finishedSongData.lyrics}</p>
                     </div>
                 </div>
             </div>
