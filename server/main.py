@@ -56,6 +56,7 @@ class ConnectionManager:
         self.player_genres: Dict[str, str] = {}
         self.player_emotions: Dict[str, str] = {}
         self.player_topics: Dict[str, str] = {}
+        self.selected_topic: str = ""
 
 
     # establish connection btwn a client and ws. waits for ws to start and adds accepted client to active connections
@@ -329,7 +330,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str | None = None)
                                 "event": "audio",
                                 "audio_data": utf,
                                 "title": title,
-                                "lyrics": lyrics
+                                "lyrics": lyrics,
+                                "genre": genre,
+                                "topic": manager.selected_topic
                             }
                             
                             # Wait for broadcasting to run
@@ -394,6 +397,7 @@ async def get_lyrics():
     if topic is None:
         topic = ""
     else:
+        manager.selected_topic = topic
         topic = "about " + topic
     # call chatgpt
     prompt = [

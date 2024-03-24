@@ -32,7 +32,12 @@ interface ISocketContext {
     songData: string;
     mediaSource: MediaSource | null;
     sourceBuffer: SourceBuffer | null;
-    finishedSongData: { title: string; lyrics: string };
+    finishedSongData: {
+        title: string;
+        lyrics: string;
+        genre: string;
+        topic: string;
+    };
     players: string[];
 }
 
@@ -51,6 +56,8 @@ export const WebsocketContext = createContext<ISocketContext>({
     finishedSongData: {
         title: "",
         lyrics: "",
+        genre: "",
+        topic: "",
     },
     players: [],
 });
@@ -68,6 +75,8 @@ export const WebsocketProvider = ({
     const [finishedSongData, setFinishedSongData] = useState({
         title: "",
         lyrics: "",
+        genre: "",
+        topic: "",
     });
     const [players, setPlayers] = useState<string[]>([]);
 
@@ -143,6 +152,8 @@ export const WebsocketProvider = ({
                 setFinishedSongData({
                     title: eventObject.title,
                     lyrics: eventObject.lyrics,
+                    genre: eventObject.genre,
+                    topic: eventObject.topic,
                 });
             } else if (eventObject.event === "phase_change") {
                 setPhase(eventObject.data);
