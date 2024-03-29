@@ -84,7 +84,7 @@ export const WebsocketProvider = ({
 
     const [mediaSource, setMediaSource] = useState<MediaSource | null>(null);
     const sourceBuffer = useRef<SourceBuffer | null>(null);
-    const [audioDataQueue, setAudioDataQueue] = useState([]);
+    const [audioDataQueue, setAudioDataQueue] = useState<ArrayBuffer[]>([]);
 
     useEffect(() => {
         const ms = new MediaSource();
@@ -110,6 +110,10 @@ export const WebsocketProvider = ({
                     if (audioDataQueue.length > 0) {
                         console.log("Processing queued audio data");
                         const nextData = audioDataQueue.shift();
+                        if (!nextData) {
+                            console.error("Error getting next audio data");
+                            return;
+                        }
                         sb.appendBuffer(nextData);
                         setAudioDataQueue(audioDataQueue.slice(1)); // Update the queue state
                     }

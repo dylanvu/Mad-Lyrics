@@ -1,4 +1,4 @@
-import { LyricPart, MadlibLineProps } from "@/app/page";
+import { LyricPart, MadlibLineProps } from "@/app/game/page";
 import React, { ChangeEvent } from "react";
 import { Input } from "./ui/input";
 import { cn } from "@/lib/utils";

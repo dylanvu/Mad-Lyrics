@@ -4,7 +4,7 @@
 import { WebsocketContext } from "@/components/socket";
 import { Loader } from "lucide-react";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import Visualizer from "../visualizer/page";
+import { Visualizer } from "../../components/ui/visualizer";
 import { Progress } from "@/components/ui/progress";
 
 const LoadingPage = () => {

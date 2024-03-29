@@ -1,13 +1,21 @@
 "use client";
 import { useRef, useState, useEffect } from "react";
-import WaveForm from "../../components/ui/waveform";
-import Waveform3D from "../../components/ui/waveform3d";
-import Ballform3D from "../../components/ui/ballform";
+import WaveForm from "./waveform";
+import Waveform3D from "./waveform3d";
+import Ballform3D from "./ballform";
 import { cn } from "@/lib/utils";
 import { PlayCircle } from "lucide-react";
 
+interface VisualizerProps {
+    audioRef: React.RefObject<HTMLAudioElement>;
+}
+
 const Visualizer: React.FC<VisualizerProps> = ({ audioRef }) => {
-    const [analyzerData, setAnalyzerData] = useState(null);
+    const [analyzerData, setAnalyzerData] = useState<{
+        analyzer: AnalyserNode;
+        bufferLength: number;
+        dataArray: Uint8Array;
+    } | null>(null);
     const [playing, setPlaying] = useState(false);
 
     // audioAnalyzer function analyzes the audio and sets the analyzerData state
@@ -20,7 +28,7 @@ const Visualizer: React.FC<VisualizerProps> = ({ audioRef }) => {
             .play()
             .catch((error) => console.error("Error playing audio:", error));
 
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const AudioContext = window.AudioContext;
         const audioCtx = new AudioContext();
 
         if (audioCtx.state === "suspended") {
@@ -37,13 +45,6 @@ const Visualizer: React.FC<VisualizerProps> = ({ audioRef }) => {
         const source = audioCtx.createMediaElementSource(audioRef.current);
         source.connect(analyzer);
         analyzer.connect(audioCtx.destination);
-        source.onended = () => {
-            setPlaying(false);
-            source.disconnect();
-            analyzer.disconnect();
-            console.log("Audio and analyzer nodes disconnected on audio end");
-        };
-
         setAnalyzerData({ analyzer, bufferLength, dataArray });
     };
 
@@ -64,8 +65,4 @@ const Visualizer: React.FC<VisualizerProps> = ({ audioRef }) => {
     );
 };
 
-interface VisualizerProps {
-    audioRef: React.RefObject<HTMLAudioElement>;
-}
-
-export default Visualizer;
+export { Visualizer };
