@@ -6,7 +6,7 @@ import Ballform3D from "../../components/ui/ballform";
 import { cn } from "@/lib/utils";
 import { PlayCircle } from "lucide-react";
 
-export default function Visualizer({ audioRef }) {
+const Visualizer: React.FC<VisualizerProps> = ({ audioRef }) => {
     const [analyzerData, setAnalyzerData] = useState(null);
     const [playing, setPlaying] = useState(false);
 
@@ -62,4 +62,10 @@ export default function Visualizer({ audioRef }) {
             <audio ref={audioRef} controls></audio>
         </div>
     );
+};
+
+interface VisualizerProps {
+    audioRef: React.RefObject<HTMLAudioElement>;
 }
+
+export default Visualizer;

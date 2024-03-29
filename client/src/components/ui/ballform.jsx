@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import AudioSphere from "./audiosphere";
+import AudioSphere from "./AudioSphere";
 
 const BallForm3D = ({ analyzerData }) => {
     const containerRef = useRef(null);

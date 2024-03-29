@@ -95,7 +95,7 @@ const LoadingPage = () => {
 const Page = () => {
     const ws = useContext(WebsocketContext);
     const [loading, setLoading] = useState(true);
-    const audioElementRef = useRef(null);
+    const audioElementRef = useRef<HTMLAudioElement>(null);
 
     const addLineBreaksForHTML = (text: string) => {
         // Replace occurrences of a word followed by a colon with a <br> tag before and after the colon
@@ -118,7 +118,7 @@ const Page = () => {
                 URL.revokeObjectURL(objectURL); // Clean up when the component unmounts or the source changes
             };
         }
-    }, [ws.mediaSource, audioElementRef.current]);
+    }, [ws.mediaSource]);
 
     return (
         <div className="flex max-h-screen min-h-screen flex-row gap-20 px-32 pb-9 pt-12 text-white">

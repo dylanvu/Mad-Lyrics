@@ -34,22 +34,6 @@ export default function Home() {
     const [feedback, setFeedback] = useState<"loading" | "done">("loading");
 
     useEffect(() => {
-        // fetch("http://localhost:8000/lyricstemplate", {
-        //     method: "GET",
-        // })
-        //     .then(async (res) => {
-        //         const resBody = await res.json();
-        //         console.log(resBody.lyrics);
-        //         setSongData(resBody.lyrics);
-        //         setFeedback("done");
-        //     })
-        //     .catch((reason: any) => {
-        //         console.error(reason);
-        //         setFeedback("done");
-        //     });
-    }, []);
-
-    useEffect(() => {
         if (ws.songData.length > 0) {
             setFeedback("done");
         }

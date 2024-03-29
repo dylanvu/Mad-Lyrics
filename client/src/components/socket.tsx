@@ -50,7 +50,7 @@ export const WebsocketContext = createContext<ISocketContext>({
     setQueue: () => {},
     phase: startingPhase,
     id: "",
-    songData: "",
+    songData: "{}",
     mediaSource: null,
     sourceBuffer: null,
     finishedSongData: {
