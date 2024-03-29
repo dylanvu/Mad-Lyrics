@@ -124,7 +124,7 @@ export const WebsocketProvider = ({
         const id = v4();
         setClientId(id);
         const socket = new WebSocket(
-            `wss://23720bc482ee.ngrok.app/ws?client_id=${id}`,
+            `wss://api.art3m1s.me/mad/ws?client_id=${id}`,
         );
         console.log(id);
 
